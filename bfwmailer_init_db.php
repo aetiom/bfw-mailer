@@ -53,10 +53,10 @@ if ($error === false) {
 
             $result .= '>> bfwmailer_outbox ...'."\033[1;32m Done\033[0m\n";
 
-            $db_sendbox = new \BfwMailer\modeles\Sendbox();
-            $db_sendbox->create_table();
+            $db_sentbox = new \BfwMailer\modeles\Sentbox();
+            $db_sentbox->create_table();
 
-            $result .= '>> bfwmailer_sendbox ...'."\033[1;32m Done\033[0m\n\n";
+            $result .= '>> bfwmailer_sentbox ...'."\033[1;32m Done\033[0m\n\n";
         }
 
         else {
