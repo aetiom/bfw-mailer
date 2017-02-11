@@ -19,12 +19,13 @@ class Sentbox extends AbstrMailBox
     
     /**
      * Create table if it doesn't already exist
+     * @param string $table_map_query : table map query to insert into the full query for table creation process
      */
-    public function create_table() 
+    public function create_table($table_map_query = null) 
     {
         
         // prepare create table request
-        $create_query = self::DB_ID.  " ID_PRIMARY_KEY_AI, "
+        $table_map_query = self::DB_ID.  " ID_PRIMARY_KEY_AI, "
                 .self::DB_LAST_ACT. " INTEGER, "
                 .self::DB_FROM.     " TEXT, "
                 .self::DB_REPLY.    " TEXT, "
@@ -33,6 +34,6 @@ class Sentbox extends AbstrMailBox
                 .self::DB_BCC.      " TEXT, "
                 .self::DB_CONT_ID.  " INTEGER UNSIGNED"; 
 
-        parent::create_table($create_query);
+        parent::create_table($table_map_query);
     }
 }
