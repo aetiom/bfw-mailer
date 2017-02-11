@@ -1,0 +1,38 @@
+{
+	"name": "dremecker/bfw-mailer",
+	"type": "library",
+	"description": "Advanced log module for BFW framework",
+	"keywords": ["mailer", "email", "module", "bfw"],
+	"homepage": "https://github.com/dremecker/bfw-mailer",
+	"time": "2017-02-10",
+	"license": "LGPL-3.0",
+	"authors":
+	[
+		{
+			"name": "Alexandre Moittié / Dremecker",
+			"homepage": "http://www.alexandre-moittie.com",
+			"email": "contact@alexandre-moittie.com"
+		}
+	],
+	"support":
+	{
+		"email": "contact@alexandre-moittie.com",
+		"issues": "https://github.com/dremecker/bfw-mailer/issues",
+		"source": "https://github.com/dremecker/bfw-mailer"
+	},
+	"require":
+	{
+		"php": ">=5.6.0",
+                "bulton-fr/bfw": "3.0.x-dev",
+                "bulton-fr/bfw-sql": "~2.0",
+                "phpmailer/phpmailer": "~5.2"
+	},
+	"minimum-stability": "stable",
+	"autoload":
+	{
+		"psr-4":
+		{
+			"BfwMailer\\": "src/classes/"
+		}
+	}
+}
