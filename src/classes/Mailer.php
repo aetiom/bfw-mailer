@@ -180,12 +180,12 @@ class Mailer {
         $outbox = $this->queueHandler->fetchAll();
         
         if ($email_sent === true) {
-            $sendbox = $this->queueHandler->fetchAll('sendbox');
+            $sentbox = $this->queueHandler->fetchAll('sentbox');
             
             $f_outbox = $this->format_mailbox($outbox, 'outbox');
-            $f_sendbox = $this->format_mailbox($sendbox, 'sendbox');
+            $f_sentbox = $this->format_mailbox($sentbox, 'sentbox');
             
-            return array_merge(array($keyMap), $f_outbox, $f_sendbox);
+            return array_merge(array($keyMap), $f_outbox, $f_sentbox);
         }
         
         return $outbox;

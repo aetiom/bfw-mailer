@@ -52,7 +52,7 @@ class QueueHandler {
         $this->db_system = new \BfwMailer\modeles\System();
         $this->db_content = new \BfwMailer\modeles\Content();
         $this->db_outbox = new \BfwMailer\modeles\Outbox();
-        $this->db_sentbox = new \BfwMailer\modeles\Sendbox();
+        $this->db_sentbox = new \BfwMailer\modeles\Sentbox();
         
         // Clamp interval values [max($minVal, min($maxVal, $val));]
         $refresh_int_raw = max(1, min(60, $options->refresh_interval));
@@ -285,7 +285,7 @@ class QueueHandler {
     
     
     /**
-     * Flush sent message from sendbox and content database
+     * Flush sent message from sentbox and content database
      * 
      * @param int $timestamp : timestamp limit
      * @return boolean : false if timestamp is wrong, true otherwise
