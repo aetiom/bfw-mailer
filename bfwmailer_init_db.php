@@ -84,21 +84,40 @@ echo "\033[1;32m Done\033[0m\n";
 // Create and init our tables into the user database
 echo $shiftingActions.' Create and/or initialize database tables :'."\n";
 
-$db_system = new \BfwMailer\modeles\System();
-$db_system->create_table();
-echo $shiftingActions.'> bfwmailer_system ...'."\033[1;32m Done\033[0m\n";
 
-$db_content = new \BfwMailer\modeles\Content();
-$db_content->create_table();
-echo $shiftingActions.'> bfwmailer_content ...'."\033[1;32m Done\033[0m\n";
+echo $shiftingActions.'> bfwmailer_content ...';
 
-$db_outbox = new \BfwMailer\modeles\Outbox();
-$db_outbox->create_table();
-echo $shiftingActions.'> bfwmailer_outbox ...'."\033[1;32m Done\033[0m\n";
+try {
+    $db_content = new \BfwMailer\modeles\Content();
+    $db_content->create_table();
+    echo "\033[1;32m Done\033[0m\n";
+} catch (\Exception $e) {
+    echo "\033[1;31m Fail !\033[0m\n";
+    echo $shiftingTxt.$e."\n";
+}
 
-$db_sendbox = new \BfwMailer\modeles\Sentbox();
-$db_sendbox->create_table();
-echo $shiftingActions.'> bfwmailer_sendbox ...'."\033[1;32m Done\033[0m\n\n";
+echo $shiftingActions.'> bfwmailer_outbox ...';
+
+try {
+    $db_outbox = new \BfwMailer\modeles\Outbox();
+    $db_outbox->create_table();
+    echo "\033[1;32m Done\033[0m\n";
+} catch (\Exception $e) {
+    echo "\033[1;31m Fail !\033[0m\n";
+    echo $shiftingTxt.$e."\n";
+}
+
+echo $shiftingActions.'> bfwmailer_sentbox ...';
+
+try {
+    $db_sendbox = new \BfwMailer\modeles\Sentbox();
+    $db_sendbox->create_table();
+    echo "\033[1;32m Done\033[0m\n";
+} catch (\Exception $e) {
+    echo "\033[1;31m Fail !\033[0m\n";
+    echo $shiftingTxt.$e."\n";
+}
+
 
 // If we don't have any error during the processing, 
 // we try to delete the symlink of this script present into the /cli directory

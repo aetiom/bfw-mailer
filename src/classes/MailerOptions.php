@@ -18,20 +18,15 @@ namespace BfwMailer;
 class MailerOptions 
 {
     /**
-     * @var \PHPMailer $default_phpmailer_obj : default PHPMailer object 
+     * @var \PHPMailer $default_phpmailer : Default PHPMailer object 
      * (for default sending and header options)
      */
-    public $default_phpmailer_obj;
+    public $default_phpmailer;
     
     /**
-     * @var integer $maxSendingAttempts : maximum sending attemps
+     * @var integer $max_sendingAttempts : maximum sending attemps
      */
-    public $maxSendingAttempts;
-    
-    /**
-     * @var integer $refresh_interval : refresh interval in minutes
-     */
-    public $refresh_interval;
+    public $max_sendingAttempts;
     
     /**
      * @var integer $sent_email_ttl : sent email time to live in days
@@ -44,17 +39,19 @@ class MailerOptions
      */
     public function __construct(\BFW\Config $config) {
 
-        $this->default_phpmailer_obj = $config->getConfig('default_phpmailer_obj');
+        $this->default_phpmailer = $config->getConfig('default_phpmailer');
         $default_phpmailer = new \PHPMailer();
         
-        // if $this->default_phpmailer_obj has not been really initialised 
+        // if $this->default_phpmailer has not been really initialised 
         // by the user, then we set it to null.
-        if ($this->default_phpmailer_obj == $default_phpmailer) {
-            $this->default_phpmailer_obj = null;
+        if ($this->default_phpmailer == $default_phpmailer) {
+            $this->default_phpmailer = null;
         }
 
-        $this->maxSendingAttempts = $config->getConfig('maxSendingAttempts');
-        $this->refresh_interval = $config->getConfig('refresh_interval');
-        $this->sent_email_ttl = $config->getConfig('sent_email_ttl');
+        // Clamp max sending attempts value between 1 and 20
+        $this->max_sendingAttempts = max(1, min(20, $config->getConfig('max_sendingAttempts')));
+        
+        // Clamp TTL value between 0 and 730 days and set it in seconds
+        $this->sent_email_ttl = max(0, min(730, $config->getConfig('sent_email_ttl'))) * 86400;
     }
 }

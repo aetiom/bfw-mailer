@@ -24,12 +24,12 @@ abstract class AbstrMailBox extends AbstrEmailData
      * Search email into the mailbox.
      * All addresses fields may be filled in line with the database format, like this : "addr0, name0; addr1, name1; ..."
      * 
-     * @param string $from    : from field
-     * @param string $reply   : reply to field
-     * @param string $to      : to field
-     * @param string $cc      : cc field
-     * @param string $bcc     : bcc field
-     * @param int    $cont_id : content id
+     * @param string  $from    : from field
+     * @param string  $reply   : reply to field
+     * @param string  $to      : to field
+     * @param string  $cc      : cc field
+     * @param string  $bcc     : bcc field
+     * @param integer $cont_id : content id
      * @return mixed : mailbox id corresponding to the found email, or false in case of non match 
      */
     public function search($from, $reply, $to, $cc, $bcc, $cont_id)
@@ -51,7 +51,7 @@ abstract class AbstrMailBox extends AbstrEmailData
                         .self::DB_BCC.    '=:'.self::DB_BCC.      ' AND '
                         .self::DB_CONT_ID.'=:'.self::DB_CONT_ID, $mailbox)
                 ->limit(1);
-        $result = $this->fetchSql($req, 'fetchRow');
+        $result = $this->fetch_sql($req, 'fetchRow');
 
         if (isset($result[self::DB_ID])) {
             return $result[self::DB_ID];
@@ -73,7 +73,7 @@ abstract class AbstrMailBox extends AbstrEmailData
         $req = $this->select()->from($this->tableName)
                 ->where(self::DB_CONT_ID.'=:cont_id', array ('cont_id' => $cont_id))
                 ->limit(1);
-        $result = $this->fetchSql($req, 'fetchRow');
+        $result = $this->fetch_sql($req, 'fetchRow');
 
         if (empty($result)) {
             return true;
@@ -88,13 +88,13 @@ abstract class AbstrMailBox extends AbstrEmailData
      * Add email into the mailbox.
      * All addresses fields may be filled in line with the database format, like this : "addr0, name0; addr1, name1; ..."
      *  
-     * @param string $from     : from field
-     * @param string $reply    : reply to field
-     * @param string $to       : to field
-     * @param string $cc       : cc field
-     * @param string $bcc      : bcc field
-     * @param int    $cont_id  : content id
-     * @param int    $email_id : email id, default = null
+     * @param string  $from     : from field
+     * @param string  $reply    : reply to field
+     * @param string  $to       : to field
+     * @param string  $cc       : cc field
+     * @param string  $bcc      : bcc field
+     * @param integer $cont_id  : content id
+     * @param integer $email_id : email id, default = null
      * @return mixed : mailbox id corresponding to the added email, or false in case of fail
      */
     public function add($from, $reply, $to, $cc, $bcc, $cont_id)
@@ -124,10 +124,10 @@ abstract class AbstrMailBox extends AbstrEmailData
      * 
      * @return array : array of email joined with content in case of success, empty array otherwise
      */
-    public function retrieveAll() 
+    public function retrieve_all() 
     {
         $content = new Content();
-        $content_tn = $content->tableName;
+        $content_tn = $content->get_tableName();
         
         // DB_MAP pour la table content
         $content_map = array(Content::DB_SUBJECT, Content::DB_BODY,
@@ -139,25 +139,6 @@ abstract class AbstrMailBox extends AbstrEmailData
                         $content_tn.'.'.Content::DB_ID, $content_map)
                 ->where(1)->order($this->tableName.'.'.self::DB_LAST_ACT.' ASC');
 
-        return $this->fetchSql($req);
-    }
-    
-    
-    /**
-     * Flush content of the mailbox regarding email last action timestamps.
-     * Method will delete all deprecated contents that is older than timestamp.
-     * 
-     * @param integer $timestamp : timestamp limit
-     */
-    public function flush($timestamp) 
-    {
-        // Delete data from table if last action was performed before $timestamp limit
-        $req = $this->delete($this->tableName)
-                ->where(self::DB_LAST_ACT.'<=:limit', array(':limit' => $timestamp))
-                ->execute();
-        
-        if ($req === false) {
-            throw new \Exception('flush failed in table '.$this->tableName.' for timestamp '.$timestamp);
-        }
+        return $this->fetch_sql($req);
     }
 }

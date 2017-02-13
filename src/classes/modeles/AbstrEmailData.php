@@ -27,12 +27,10 @@ abstract class AbstrEmailData extends AbstrModeles
     {
         if ($id === null) {
             $req = $this->select()->from($this->tableName);
-            $result = $this->fetchSql($req);
-        }
-        
-        else {
+            $result = $this->fetch_sql($req);
+        } else {
             $req = $this->select()->from($this->tableName)->where(self::DB_ID.'=:id', array('id' => $id));
-            $result = $this->fetchSql($req, 'fetchRow');
+            $result = $this->fetch_sql($req, 'fetchRow');
         }
         
         return $result;
@@ -43,28 +41,26 @@ abstract class AbstrEmailData extends AbstrModeles
     /**
      * Update data last action timestamp
      * 
-     * @param integer $id       : data id 
-     * @param integer $last_act : last action timestamp
+     * @param integer $id        : data id 
+     * @param integer $timestamp : last action timestamp
      * 
      * @throws \Exception
      * @return boolean : true in case of success, false otherwise
      */
-    public function updateLastAction ($id, $last_act = null) 
+    public function update_lastAction ($id, $timestamp = null) 
     {
         // if last action timestamp is not filled, take actual timestamp
-        if ($last_act === null || empty($last_act)) {
-            $last_act = strval(time());
-        }
-
-        else {
-            $last_act = strval($last_act);
+        if ($timestamp === null || empty($timestamp)) {
+            $timestamp = strval(time());
+        } else {
+            $timestamp = strval($timestamp);
         }
         
         $req = $this->select()->from($this->tableName)->where(self::DB_ID.'=:id', array('id' => $id));
-        $result = $this->fetchSql($req, 'fetchRow');
+        $result = $this->fetch_sql($req, 'fetchRow');
 
-        if (!empty($result) && $result[self::DB_LAST_ACT] !== $last_act) {
-            $req = $this->update($this->tableName, array(self::DB_LAST_ACT => $last_act))
+        if (!empty($result) && $result[self::DB_LAST_ACT] !== $timestamp) {
+            $req = $this->update($this->tableName, array(self::DB_LAST_ACT => $timestamp))
                     ->where(self::DB_ID.'=:id', array(':id' => $id))
                     ->execute();
 
@@ -102,4 +98,24 @@ abstract class AbstrEmailData extends AbstrModeles
         }
     }
     
+    
+    
+    /**
+     * Verify if a flush is needed
+     * 
+     * @param integer $timestamp : timestamp limit for flushing sent email
+     * @return boolean : true in case of flush is needed, false otherwise
+     */
+    protected function is_flush_needed($timestamp) {
+        
+        // prepare the request
+        $req = $this->select()->from($this->tableName)
+                ->where(self::DB_LAST_ACT.'<=:limit', array(':limit' => $timestamp));
+
+        if(empty($this->fetch_sql($req))) {
+            return false;
+        } 
+        
+        return true;
+    }
 }

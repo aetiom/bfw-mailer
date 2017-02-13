@@ -38,7 +38,7 @@ class Mailer {
      * 
      * @return SendingStatus $this->sendingStatus
      */
-    public function getCurrent_sendingStatus()
+    public function get_sendingStatus()
     {
         return $this->sendingStatus;
     }
@@ -50,8 +50,8 @@ class Mailer {
      * 
      * @param \BFW\Config $email_config BFW Mailer Config
      */
-    public function __construct(\BFW\Config $email_config) {
-
+    public function __construct(\BFW\Config $email_config) 
+    {
         $this->options = new MailerOptions($email_config);
         $this->queueHandler = new QueueHandler($this->options);
         
@@ -68,7 +68,7 @@ class Mailer {
      * @param integer    $priority      : email priority (from SendingStatus)
      * @param integer    $scheduledTime : sending scheduled time 
      * 
-     * @throws Exception
+     * @throws \Exception
      * @return boolean false on error - See the ErrorInfo property for details of the error.
      */
     public function queue_email(\PHPMailer &$email, $priority = SendindStatus::PRIO_DEFAULT, $scheduledTime = 0)
@@ -92,9 +92,7 @@ class Mailer {
                     return $email_id;
                 }
             }
-        } 
-
-        catch (Exception $e) {
+        } catch (\Exception $e) {
             $this->email = null;
             $this->sendingStatus = null;
 
@@ -148,7 +146,7 @@ class Mailer {
     {
         $this->initialize();
         
-        $outbox_id = $this->queueHandler->dequeue($this->email, $this->sendingStatus, $this->options->maxSendingAttempts);
+        $outbox_id = $this->queueHandler->dequeue($this->email, $this->sendingStatus, $this->options->max_sendingAttempts);
         $this->sendingStatus->queue_id = $outbox_id;
         
         if ($outbox_id !== false) {
@@ -157,9 +155,7 @@ class Mailer {
             if ($isSent === true) { 
                 $this->sendingStatus->queue_id = $this->queueHandler->archive($this->email, $outbox_id);
                 return true; 
-            }
-            
-            else { 
+            } else { 
                 return false;
             }
         }
@@ -175,12 +171,12 @@ class Mailer {
      * @param boolean $email_sent : if true, return email sent too (default = true)
      * @return array : Mailbox data in an array formated with modeles\Outbox $DB_* labels
      */
-    public function getMailbox($email_sent = true) 
+    public function get_mailbox($email_sent = true) 
     {
-        $outbox = $this->queueHandler->fetchAll();
+        $outbox = $this->queueHandler->fetch_emails();
         
         if ($email_sent === true) {
-            $sentbox = $this->queueHandler->fetchAll('sentbox');
+            $sentbox = $this->queueHandler->fetch_emails('sentbox');
             
             $f_outbox = $this->format_mailbox($outbox, 'outbox');
             $f_sentbox = $this->format_mailbox($sentbox, 'sentbox');
@@ -203,18 +199,14 @@ class Mailer {
         if ($email_conf !== null) {
             $this->email =  $email_conf;
             
-            if ($this->options->default_phpmailer_obj !== null) {
+            if ($this->options->default_phpmailer !== null) {
                 $default = new \PHPMailer();
                 $this->email = $this->merge_conf($email_conf, 
-                        $this->options->default_phpmailer_obj, $default);
+                        $this->options->default_phpmailer, $default);
             }
-        }
-        
-        elseif ($this->options->default_phpmailer_obj !== null) {
-            $this->email = clone $this->options->default_phpmailer_obj;
-        }
-        
-        else {
+        } elseif ($this->options->default_phpmailer !== null) {
+            $this->email = clone $this->options->default_phpmailer;
+        } else {
             $this->email =  new \PHPMailer();
         }
         
@@ -227,24 +219,25 @@ class Mailer {
     /**
      * Send $this->email using phpmailer process
      * 
-     * @param int $outbox_id : outbox id if email comes from outbox (default = null)
+     * @param integer $outbox_id : outbox id if email comes from outbox (default = null)
      * @return boolean : true when email is sent successfully, false otherwise
      */
     private function send($outbox_id = null) 
     {
+        $this->sendingStatus->lastAction_ts = time();
         $isSent = $this->email->send();
-
+                
         if ($isSent === true) {
             $this->sendingStatus->state = SendindStatus::STATE_SUCCEEDED;
             $this->sendingStatus->lastAction_ts = time();
-        }
-        
-        elseif ($outbox_id !== null) {
-            $this->sendingStatus->state = SendindStatus::STATE_FAILED;
             
-            if ($this->sendingStatus->attempts < $this->options->maxSendingAttempts) {
-                $this->sendingStatus->lastAction_ts = time()+ pow(2, $this->options->maxSendingAttempts)*60;
-                $this->sendingStatus->attempts += 1;
+        // if we are not in send then archive behavior, update the sending status
+        } elseif ($outbox_id !== null) {
+            $this->sendingStatus->state = SendindStatus::STATE_FAILED;
+            $this->sendingStatus->attempts += 1;
+            
+            if ($this->sendingStatus->attempts < $this->options->max_sendingAttempts) {
+                $this->sendingStatus->lastAction_ts = time() + $this->sendingStatus->attempts * 900;
             }
         }
         
@@ -253,7 +246,7 @@ class Mailer {
         }
         
         if ($outbox_id !== null) {
-            $this->queueHandler->updateSendingStatus($this->sendingStatus, $outbox_id);
+            $this->queueHandler->update_sendingStatus($this->sendingStatus, $outbox_id);
         }
         
         return $isSent;

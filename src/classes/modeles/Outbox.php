@@ -85,16 +85,16 @@ class Outbox extends AbstrMailBox
     /**
      * Get the next email to send from the mailbox queue
      *
-     * @param int $maxSendingAttempts : max sending attempts authorized
+     * @param integer $max_sendingAttempts : max sending attempts authorized
      * @return mixed : next email to send id if success, false otherwise
      */
-    public function getNextPending($maxSendingAttempts)
+    public function get_nextPending($max_sendingAttempts)
     {
         // Nous construisons nos données pour le test sur l'outbox
         $outbox_test = array(
             ':pending'     => \BfwMailer\SendindStatus::STATE_PENDING, 
             ':failed'      => \BfwMailer\SendindStatus::STATE_FAILED, 
-            ':maxAttempts' => $maxSendingAttempts,
+            ':maxAttempts' => $max_sendingAttempts,
             ':actualTime'  => time());
         
         // Connexion à la bdd pour récupérer l'email actif avec la plus petite priorité (type)
@@ -105,7 +105,7 @@ class Outbox extends AbstrMailBox
                         .self::DB_LAST_ACT.    '<=:actualTime', $outbox_test)
                 ->order(self::DB_PRIORITY.' ASC')
                 ->limit(1);
-        $outbox = $this->fetchSql($req, 'fetchRow');
+        $outbox = $this->fetch_sql($req, 'fetchRow');
         
         if (isset($outbox[self::DB_ID])) {
             return $outbox[self::DB_ID];
@@ -124,9 +124,9 @@ class Outbox extends AbstrMailBox
      * @param string  $error      : sending error message
      * @param integer $attempts   : sending attempts
      * @return boolean : true in case of success, false otherwise
-     * @throws Exception
+     * @throws \Exception
      */
-    public function updateStatus ($outbox_id, $state, $error, $attempts) 
+    public function update_status ($outbox_id, $state, $error, $attempts) 
     {
         $mailbox_push = array (
             self::DB_STATE    => $state,
@@ -148,21 +148,14 @@ class Outbox extends AbstrMailBox
     /**
      * Refresh scheduled emails
      * 
-     * @param int $timestamp : timestamp that will determine if an email must stay into scheduled state or not
+     * @param integer $timestamp : timestamp that will determine if an email must stay into scheduled state or not
      * @return boolean
      */
-    public function refreshScheduled($timestamp = null) 
+    public function refresh_scheduled($timestamp) 
     {
-        // if timestamp is not filled, take actual timestamp
-        if ($timestamp === null) {
-            $timestamp = time();
+        if (!$this->is_refresh_needed($timestamp)) {
+            return false;
         }
-        
-        // construct data for test purposes
-        $mailbox_test = array(
-            ':scheduled'  => \BfwMailer\SendindStatus::STATE_SCHEDULED,
-            ':actualTime' => $timestamp
-        );
         
         // construct data to push
         $mailbox_push = array (
@@ -170,22 +163,100 @@ class Outbox extends AbstrMailBox
             self::DB_LAST_ACT => time()
         );
 
-        $req = $this->select()->from($this->tableName)
-                ->where(self::DB_STATE.'=:scheduled AND '.self::DB_LAST_ACT.'<=:actualTime', $mailbox_test);
-        $mailbox = $this->fetchSql($req);
+        foreach ($mailbox as $email) {
+            $req = $this->update($this->tableName, $mailbox_push)
+                    ->where(self::DB_ID.'=:id', array(':id' => $email[self::DB_ID]))
+                    ->execute();
 
-        if (!empty($mailbox)) {
-            foreach ($mailbox as $email) {
-                $req = $this->update($this->tableName, $mailbox_push)
-                        ->where(self::DB_ID.'=:id', array(':id' => $email[self::DB_ID]))
-                        ->execute();
-
-                if ($req === false) {
-                    throw \Exception("scheduled email refresh failed while updating email ".$email[self::DB_ID]);
-                }
+            if ($req === false) {
+                throw \Exception("scheduled email refresh failed while updating email ".$email[self::DB_ID]);
             }
-            return true;
         }
-        return false;
+        
+        return true;
+    }
+    
+    
+    
+    /**
+     * Flush content of the mailbox regarding email last action timestamps.
+     * Method will delete all deprecated contents that is older than timestamp.
+     * 
+     * @param integer $timestamp : timestamp limit
+     */
+    public function flush($timestamp) 
+    {
+        if (!$this->is_flush_needed($timestamp)) {
+            return false;
+        }
+        
+        // construct data
+        $mailbox_data = array(
+            ':scheduled'  => \BfwMailer\SendindStatus::STATE_FAILED,
+            ':actualTime' => $timestamp
+        );
+        
+        // Delete data from table if last action was performed before $timestamp limit
+        $req = $this->delete($this->tableName)
+                ->where(self::DB_STATE.'=:scheduled AND '.self::DB_LAST_ACT.'<=:actualTime', $mailbox_data)
+                ->execute();
+        
+        if ($req === false) {
+            throw new \Exception('flush failed in table '.$this->tableName.' for timestamp '.$timestamp);
+        }
+        
+        return true;
+    }
+    
+    
+    
+    /**
+     * Verify if a flush is needed
+     * 
+     * @param integer $timestamp : timestamp limit for flushing sent email
+     * @return boolean : true in case of flush is needed, false otherwise
+     */
+    protected function is_flush_needed($timestamp) {
+        // construct data for test purposes
+        $mailbox_data = array(
+            ':scheduled'  => \BfwMailer\SendindStatus::STATE_FAILED,
+            ':actualTime' => $timestamp
+        );
+        
+        // prepare the request
+        $req = $this->select()->from($this->tableName)
+                ->where(self::DB_STATE.'=:scheduled AND '.self::DB_LAST_ACT.'<=:actualTime', $mailbox_data);
+
+        if(empty($this->fetch_sql($req))) {
+            return false;
+        } 
+        
+        return true;
+    }
+    
+    
+    
+    /**
+     * Verify if a refresh is needed for scheduled emails
+     * 
+     * @param integer $timestamp : timestamp limit for flushing sent email
+     * @return boolean : true in case of flush is needed, false otherwise
+     */
+    private function is_refresh_needed($timestamp) {
+        // construct data for test purposes
+        $mailbox_data = array(
+            ':scheduled'  => \BfwMailer\SendindStatus::STATE_SCHEDULED,
+            ':actualTime' => $timestamp
+        );
+        
+        // prepare the request
+        $req = $this->select()->from($this->tableName)
+                ->where(self::DB_STATE.'=:scheduled AND '.self::DB_LAST_ACT.'<=:actualTime', $mailbox_data);
+
+        if(empty($this->fetch_sql($req))) {
+            return false;
+        } 
+        
+        return true;
     }
 }
