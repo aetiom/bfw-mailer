@@ -96,7 +96,7 @@ $db_outbox = new \BfwMailer\modeles\Outbox();
 $db_outbox->create_table();
 echo $shiftingActions.'> bfwmailer_outbox ...'."\033[1;32m Done\033[0m\n";
 
-$db_sendbox = new \BfwMailer\modeles\Sendbox();
+$db_sendbox = new \BfwMailer\modeles\Sentbox();
 $db_sendbox->create_table();
 echo $shiftingActions.'> bfwmailer_sendbox ...'."\033[1;32m Done\033[0m\n\n";
 
