@@ -7,8 +7,8 @@
  */
 
 //Default: Run by BFW install module script
-$shiftingActions = '      >';
-$shiftingTxt     = '           ';
+$shiftingActions = '          >';
+$shiftingTxt     = '               ';
 
 //Run by user with cli.php
 if (defined('CLI_MODE')) {
