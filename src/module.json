@@ -1,3 +1,6 @@
 {
-    "runner": "runner.php"
+    "runner": "runner.php",
+    "require": [
+        "bfw-sql"
+    ]
 }
