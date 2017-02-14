@@ -11,11 +11,6 @@ namespace BfwMailer;
 class QueueHandler {
     
     /**
-     * @var integer $refresh_int : refresh interval
-     */
-    protected $refresh_int;
-    
-    /**
      * @var integer $sent_ttl : email sent time to live
      */
     protected $sent_ttl;
@@ -35,10 +30,6 @@ class QueueHandler {
      */
     protected $db_sentbox;
     
-    /**
-     * @var System $db_system : modele for bfw-mailer system data
-     */
-    protected $db_system;
     
     
     /**
@@ -49,19 +40,14 @@ class QueueHandler {
     public function __construct(MailerOptions $options) 
     {
         // Create our data instances
-        $this->db_system = new \BfwMailer\modeles\System();
         $this->db_content = new \BfwMailer\modeles\Content();
         $this->db_outbox = new \BfwMailer\modeles\Outbox();
         $this->db_sentbox = new \BfwMailer\modeles\Sentbox();
         
-        // Clamp interval values [max($minVal, min($maxVal, $val));]
-        $refresh_int_raw = max(1, min(60, $options->refresh_interval));
-        $sent_ttl_raw = max(0, min(730, $options->sent_email_ttl));
-        
-        // Set deltas in seconds from clamped interval
-        $this->refresh_int = $refresh_int_raw * 60;
-        $this->sent_ttl = $sent_ttl_raw * 86400;
+        // Get sent email TTL value
+        $this->sent_ttl = $options->sent_email_ttl;
     }
+    
     
     
     /**
@@ -73,23 +59,23 @@ class QueueHandler {
      */
     public function enqueue (\PHPMailer &$email, SendindStatus &$sendingStatus) 
     {   
-        // Nous traitons notre contenu
+        // processing email content and retreiving content database id
         $cont_id = $this->process_content($email);
 
-        // Si nous avons un id, nous construisons le données de l'outbox et nous 
-        // les poussons dans la table prévue à cet effet
+        // if content processing going well, add email metadata into outbox and
+        // update the sending status of the whole email
         if ($cont_id !== false) {
 
             $out_id = $this->db_outbox->add( 
                 $email->From.','.$email->FromName.';', 
-                $this->getInline($email->getReplyToAddresses()), 
-                $this->getInline($email->getToAddresses()), 
-                $this->getInline($email->getCcAddresses()), 
-                $this->getInline($email->getBccAddresses()), 
+                $this->serial_emailAttr($email->getReplyToAddresses()), 
+                $this->serial_emailAttr($email->getToAddresses()), 
+                $this->serial_emailAttr($email->getCcAddresses()), 
+                $this->serial_emailAttr($email->getBccAddresses()), 
                 $cont_id, $sendingStatus->priority);
 
             if ($out_id !== false) {
-                $this->updateSendingStatus($sendingStatus, $out_id, $cont_id);
+                $this->update_sendingStatus($sendingStatus, $out_id, $cont_id);
                 return $out_id;
             }
         }
@@ -102,42 +88,41 @@ class QueueHandler {
      * Dequeue next pending email and modify params objects content passed as references 
      * with next pending email information (header, content, etc.)
      * 
-     * @param \PHPMailer                $email              : (as REF) PHPMailer object containing email informations (header, content, etc.)
-     * @param \BfwMailer\SendindStatus  $sendingStatus      : (as REF) Sending status
-     * @param int                       $maxSendingAttempts : max sending attemps tolerated
+     * @param \PHPMailer                $email               : (as REF) PHPMailer object containing email informations (header, content, etc.)
+     * @param \BfwMailer\SendindStatus  $sendingStatus       : (as REF) Sending status
+     * @param integer                   $max_sendingAttempts : max sending attemps tolerated
      * @return boolean : true in case of success, false otherwise
      */
-    public function dequeue (\PHPMailer &$email, SendindStatus &$sendingStatus, $maxSendingAttempts) 
+    public function dequeue (\PHPMailer &$email, SendindStatus &$sendingStatus, $max_sendingAttempts) 
     {
-        // we refresh our scheduled elements before going further
-        if ($this->db_system->getLastRefresh() + $this->refresh_int < time()) {
-            $this->db_outbox->refreshScheduled(time() + round(0.2 * $this->refresh_int));           
-            $this->db_system->updateLastRefresh();
-        }
+        // refreshing our scheduled elements before going further
+        $this->db_outbox->refresh_scheduled(time());
         
         // get the next email to send from the queue
-        $out_id = $this->db_outbox->getNextPending($maxSendingAttempts);
+        $out_id = $this->db_outbox->get_nextPending($max_sendingAttempts);
         
         if ($out_id !== false) {
             
+            // retrieving outbox and content data
             $outbox = $this->db_outbox->retrieve($out_id);
             $content = $this->db_content->retrieve($outbox[modeles\Outbox::DB_CONT_ID]);
 
-            // Nous construisons notre contenu pour injection dans la base
+            // making email sending status
             $sendingStatus->priority      = $outbox[modeles\Outbox::DB_PRIORITY];
             $sendingStatus->state         = $outbox[modeles\Outbox::DB_STATE];
             $sendingStatus->error         = $outbox[modeles\Outbox::DB_ERROR];
             $sendingStatus->attempts      = $outbox[modeles\Outbox::DB_ATTEMPTS];
             $sendingStatus->lastAction_ts = $outbox[modeles\Outbox::DB_LAST_ACT];
 
-            $this->addAttrToEmail($email, $outbox[modeles\Outbox::DB_FROM], 'From');
-            $this->addAttrToEmail($email, $outbox[modeles\Outbox::DB_REPLY], 'ReplyTo');
-            $this->addAttrToEmail($email, $outbox[modeles\Outbox::DB_TO], 'Address');
-            $this->addAttrToEmail($email, $outbox[modeles\Outbox::DB_CC], 'CC');
-            $this->addAttrToEmail($email, $outbox[modeles\Outbox::DB_BCC], 'BCC');
+            // making email metadata
+            $this->add_emailAttr($email, $outbox[modeles\Outbox::DB_FROM], 'From');
+            $this->add_emailAttr($email, $outbox[modeles\Outbox::DB_REPLY], 'ReplyTo');
+            $this->add_emailAttr($email, $outbox[modeles\Outbox::DB_TO], 'Address');
+            $this->add_emailAttr($email, $outbox[modeles\Outbox::DB_CC], 'CC');
+            $this->add_emailAttr($email, $outbox[modeles\Outbox::DB_BCC], 'BCC');
 
+            // constructing email content
             if ($content !== false) {
-
                 $email->Subject = $content[modeles\Content::DB_SUBJECT];
                 $email->Body    = $content[modeles\Content::DB_BODY];
                 $email->AltBody = $content[modeles\Content::DB_ALT_BODY];
@@ -147,25 +132,21 @@ class QueueHandler {
                     $email->isHTML();
                 }
 
-                $this->addAttrToEmail($email, $content[modeles\Content::DB_ATTACHMENTS], 'Attachment');
+                $this->add_emailAttr($email, $content[modeles\Content::DB_ATTACHMENTS], 'Attachment');
                 return $out_id;
-            }
-
-            else {
+                
+            } else {
                 $sendingStatus->lastAction_ts = time();
                 $sendingStatus->error = 'Content (id='.$outbox[modeles\Outbox::DB_CONT_ID].') not found';
                 $sendingStatus->state = SendindStatus::STATE_FAILED;
 
-                $this->updateSendingStatus($sendingStatus, $out_id, $outbox[modeles\Outbox::DB_CONT_ID]);
+                $this->update_sendingStatus($sendingStatus, $out_id, $outbox[modeles\Outbox::DB_CONT_ID]);
             }
 
         }
         
-        // check if sent_ttl is set and if the last flush action have been done more than a day before
-        if ($this->sent_ttl > 0 && $this->db_system->getLastFlush() + 86400 < time()) {
-            $this->flushSent(time() - $this->sent_ttl);
-        }
-        
+        // flushing old sent emails and old failed emails
+        $this->clean_db(time() - $this->sent_ttl);
         return false;
     }
     
@@ -181,25 +162,26 @@ class QueueHandler {
      */
     public function archive (\PHPMailer &$email, $outbox_id = null) 
     {   
-        // Nous traitons notre contenu
+        // processing email content and retreiving content database id
         $cont_id = $this->process_content($email);
 
-        // Si nous avons un id, nous construisons le données de l'outbox et nous 
-        // les poussons dans la table prévue à cet effet
+        // if content processing going well, add email metadata into sentbox,
+        // update the last action timestamp of the whole email 
+        // and remove the email metadata from the outbox
         if ($cont_id !== false) {
 
             $send_id = $this->db_sentbox->add( 
                 $email->From.','.$email->FromName.';', 
-                $this->getInline($email->getReplyToAddresses()), 
-                $this->getInline($email->getToAddresses()), 
-                $this->getInline($email->getCcAddresses()), 
-                $this->getInline($email->getBccAddresses()), 
+                $this->serial_emailAttr($email->getReplyToAddresses()), 
+                $this->serial_emailAttr($email->getToAddresses()), 
+                $this->serial_emailAttr($email->getCcAddresses()), 
+                $this->serial_emailAttr($email->getBccAddresses()), 
                 $cont_id);
 
             if ($send_id !== false) { 
                 
-                $this->db_sentbox->updateLastAction($send_id);
-                $this->db_content->updateLastAction($cont_id);
+                $this->db_sentbox->update_lastAction($send_id);
+                $this->db_content->update_lastAction($cont_id);
                 
                 if ($outbox_id !== null) {
                     $this->db_outbox->remove($outbox_id);
@@ -221,18 +203,18 @@ class QueueHandler {
      * @param integer                  $outbox_id     : outbox id
      * @param integer                  $content_id    : content id (default : null)
      */
-    public function updateSendingStatus(SendindStatus $sendingStatus, $outbox_id, $content_id = null)
+    public function update_sendingStatus(SendindStatus $sendingStatus, $outbox_id, $content_id = null)
     {
         if ($content_id === null) {
             $outbox = $this->db_outbox->retrieve($outbox_id);
             $content_id = $outbox[modeles\Outbox::DB_CONT_ID];
         }
         
-        $this->db_outbox->updateStatus($outbox_id, $sendingStatus->state, 
+        $this->db_outbox->update_status($outbox_id, $sendingStatus->state, 
                 $sendingStatus->error, $sendingStatus->attempts);  
 
-        $this->db_outbox->updateLastAction($outbox_id, $sendingStatus->lastAction_ts);
-        $this->db_content->updateLastAction($content_id, $sendingStatus->lastAction_ts);
+        $this->db_outbox->update_lastAction($outbox_id, $sendingStatus->lastAction_ts);
+        $this->db_content->update_lastAction($content_id, $sendingStatus->lastAction_ts);
     }
     
     
@@ -243,14 +225,12 @@ class QueueHandler {
      * @param string $source : source of the fetch, can only take value of 'outbox' or 'sentbox'
      * @return array : fetched data
      */
-    public function fetchAll($source='outbox')
+    public function fetch_emails($source='outbox')
     {
         if ($source === 'outbox') {
-            return $this->db_outbox->retrieveAll($this->db_content);
-        }
-        
-        elseif ($source === 'sentbox') {
-            return $this->db_sentbox->retrieveAll($this->db_content);
+            return $this->db_outbox->retrieve_all();
+        } elseif ($source === 'sentbox') {
+            return $this->db_sentbox->retrieve_all();
         }
         
         return array();
@@ -267,7 +247,7 @@ class QueueHandler {
      */
     private function process_content(\PHPMailer &$email) {
         // Convert array attachments into a string
-        $attachments = $this->getInline($email->getAttachments());
+        $attachments = $this->serial_emailAttr($email->getAttachments());
         
         // Nous vérifions que le contenu de l'email à envoyé n'existe pas déjà en base de donnée
         $cont_id = $this->db_content->search($email->Subject, $email->Body, $email->AltBody, $attachments);
@@ -281,29 +261,31 @@ class QueueHandler {
     }
     
 
-
-    
     
     /**
-     * Flush sent message from sentbox and content database
+     * Flush sent and failed emails from mailboxes and content database
      * 
-     * @param int $timestamp : timestamp limit
-     * @return boolean : false if timestamp is wrong, true otherwise
+     * @param integer $timestamp : timestamp limit
+     * @return boolean : false if no flush have been done, true otherwise
      */
-    private function flushSent($timestamp)
+    private function clean_db($timestamp)
     {
-        // check if $timestamp is set and higher than 0
-        if ($timestamp !== null && $timestamp > 0) {
-            $this->db_sentbox->flush($timestamp);
-            $this->db_content->flush($timestamp);
-            
-            $this->db_system->updateLastFlush();
-            
-            return true;
+        // check if sent TLL and timestamp is set and higher than 0
+        if ($this->sent_ttl <= 0 || $timestamp === null || $timestamp <= 0) {
+            return false;
         }
-
-        return false;
+        
+        $flush_sent = $this->db_sentbox->flush($timestamp);
+        $flush_fail = $this->db_outbox->flush($timestamp);
+        $flush_cont = $this->db_content->flush($timestamp);
+        
+        if ($flush_sent === false && $flush_fail === false && $flush_cont === false) {
+            return false;
+        }
+        
+        return true;
     }
+    
     
     
     /**
@@ -314,7 +296,7 @@ class QueueHandler {
      * @param string     $attr    : attribut to add to the email, can take those values : From, Address, ReplyTo, CC, BCC, Attachment
      * @return boolean : return true in case of success, false otherwise
      */
-    private function addAttrToEmail(\PHPMailer &$email, $db_data, $attr = 'Address')
+    private function add_emailAttr(\PHPMailer &$email, $db_data, $attr = 'Address')
     {
         $method = 'add';
         
@@ -333,16 +315,13 @@ class QueueHandler {
         foreach ($array_data as $line) {
             if (strpos($line, ',') !== false) {
                 $a = explode(',', $line);
-            }
-            else {
+            } else {
                 $a = array($line, '');
             }
             
             try {
                 $email->{$method.$attr}($a[0], $a[1]);
-            }
-
-            catch (Exception $e) {
+            } catch (\Exception $e) {
                 trigger_error($e->getMessage(), E_USER_ERROR);
                 return false; 
             }
@@ -352,23 +331,22 @@ class QueueHandler {
     }
 
     
+    
     /**
-     * Transform two dimensions array into a single string
+     * Serialize email attribute by transforming two dimensional array into a single string
      * Separate first level array values by ";" and second by ","
      * 
      * @param array $array
      * @return string
      */
-    private function getInline(array $array) 
+    private function serial_emailAttr(array $array) 
     {
         $inline = '';
         
         foreach ($array as $val) {
             if (is_array($val)) {
                 $inline .= implode(',', $val).';';
-            }
-            
-            else {
+            } else {
                 $inline .= $val.';';
             }
         }

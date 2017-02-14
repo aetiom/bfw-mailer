@@ -7,24 +7,19 @@
  */
 
 // Default PHPMailer for creating/sending emails
-$default_phpmailer_obj = new PHPMailer();
+$default_phpmailer = new PHPMailer();
 
 return (object)[
     /**
-     * @var PHPMailer default_phpmailer_obj : Default PHPMailer object 
+     * @var PHPMailer default_phpmailer : Default PHPMailer object 
      * (for default sending and header options).
      */
-    'default_phpmailer_obj' => $default_phpmailer_obj,
+    'default_phpmailer' => $default_phpmailer,
     
     /**
-     * @var integer maxSendingAttempts : Maximum sending attemps.
+     * @var integer max_sendingAttempts : Maximum sending attemps.
      */
-    'maxSendingAttempts' => 9,    
-    
-    /**
-     * @var integer refresh_interval : Refresh interval in minutes.
-     */
-    'refresh_interval' => 15,
+    'max_sendingAttempts' => 9,    
     
     /**
      * @var integer sent_email_ttl : Sent email time to live in days. 

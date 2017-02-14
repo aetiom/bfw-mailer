@@ -13,7 +13,7 @@ class Sentbox extends AbstrMailBox
     /**
      * @var string $tableName : table name
      */
-    protected $tableName = 'bfwmailer_sendbox';
+    protected $tableName = 'bfwmailer_sentbox';
     
     
     
@@ -35,5 +35,31 @@ class Sentbox extends AbstrMailBox
                 .self::DB_CONT_ID.  " INTEGER UNSIGNED"; 
 
         parent::create_table($table_map_query);
+    }
+    
+    
+    
+    /**
+     * Flush content of the mailbox regarding email last action timestamps.
+     * Method will delete all deprecated contents that is older than timestamp.
+     * 
+     * @param integer $timestamp : timestamp limit
+     */
+    public function flush($timestamp) 
+    {
+        if (!$this->is_flush_needed($timestamp)) {
+            return false;
+        }
+        
+        // Delete data from table if last action was performed before $timestamp limit
+        $req = $this->delete($this->tableName)
+                ->where(self::DB_LAST_ACT.'<=:limit', array(':limit' => $timestamp))
+                ->execute();
+        
+        if ($req === false) {
+            throw new \Exception('flush failed in table '.$this->tableName.' for timestamp '.$timestamp);
+        }
+        
+        return true;
     }
 }

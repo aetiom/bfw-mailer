@@ -67,7 +67,7 @@ class Content extends AbstrEmailData
                         .self::DB_ALT_BODY.   '=:'.self::DB_ALT_BODY.   ' AND '
                         .self::DB_ATTACHMENTS.'=:'.self::DB_ATTACHMENTS, $content)
                 ->limit(1);
-        $result = $this->fetchSql($req, 'fetchRow');
+        $result = $this->fetch_sql($req, 'fetchRow');
         
         if (isset($result[self::DB_ID])) {
             return $result[self::DB_ID];
@@ -110,15 +110,19 @@ class Content extends AbstrEmailData
      * do not remove content that is actualy used by any outbox email.
      * Method will delete all deprecated contents that is older than timestamp.
      * 
-     * @param int $timestamp : timestamp limit
+     * @param integer $timestamp : timestamp limit
      */
     public function flush($timestamp) 
     {
+        if (!$this->is_flush_needed($timestamp)) {
+            return false;
+        }
+        
         $outbox = new Outbox();
         
         $req = $this->select()->from($this->tableName)
                 ->where(self::DB_LAST_ACT.'<=:limit', array(':limit' => $timestamp));
-        $result = $this->fetchSql($req);
+        $result = $this->fetch_sql($req);
         
         if (!empty($result)) {
             foreach ($result as $line) {
@@ -127,7 +131,11 @@ class Content extends AbstrEmailData
                     $this->remove($line[self::DB_ID]);
                 }
             }
+        } else {
+            return false;
         }
+        
+        return true;
     }
 
 }

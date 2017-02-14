@@ -15,7 +15,7 @@ abstract class AbstrModeles extends \BfwSql\Modeles
      * Get table name
      * @return string : table name
      */
-    public function getTableName() 
+    public function get_tableName() 
     {
         return $this->tableName;
     }
@@ -34,13 +34,9 @@ abstract class AbstrModeles extends \BfwSql\Modeles
         // generate the right automatic key, depending on the db/connexion type
         if ($type === 'pgsql') {
             $auto_key = 'SERIAL PRIMARY KEY';
-        }
-        
-        elseif ($type === 'sqlite') {
+        } elseif ($type === 'sqlite') {
             $auto_key = 'INTEGER PRIMARY KEY AUTOINCREMENT';
-        }
-        
-        else {
+        } else {
             $auto_key = 'INTEGER PRIMARY KEY AUTO_INCREMENT';
         }
         
@@ -62,7 +58,7 @@ abstract class AbstrModeles extends \BfwSql\Modeles
      * @throws \Exception
      * @return boolean|array : false si erreur, tableau de résultat sinon
      */
-    protected function fetchSql($req, $fetchType = 'fetchAll')
+    protected function fetch_sql($req, $fetchType = 'fetchAll')
     {
         if($fetchType != 'fetchAll' && $fetchType != 'fetchRow') {
             return false;
@@ -70,22 +66,16 @@ abstract class AbstrModeles extends \BfwSql\Modeles
 
         try {
             $res = $req->{$fetchType}();
-        }
-        
-        catch (Exception $e) {
+        } catch (\Exception $e) {
             trigger_error($e->getMessage(), E_USER_ERROR);
             return false;
         }
 
         if ($res) {
             return $res;
-        }
-        
-        elseif (!$res && $req->nb_result() === 0) {
+        } elseif (!$res && $req->nb_result() === 0) {
             return array();
-        }
-        
-        else {
+        } else {
             throw new \Exception('Error while retrieving data.');
         }
     }
