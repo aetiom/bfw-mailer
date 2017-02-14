@@ -94,7 +94,6 @@ abstract class AbstrMailBox extends AbstrEmailData
      * @param string  $cc       : cc field
      * @param string  $bcc      : bcc field
      * @param integer $cont_id  : content id
-     * @param integer $email_id : email id, default = null
      * @return mixed : mailbox id corresponding to the added email, or false in case of fail
      */
     public function add($from, $reply, $to, $cc, $bcc, $cont_id)

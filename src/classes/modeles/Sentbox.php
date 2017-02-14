@@ -13,7 +13,7 @@ class Sentbox extends AbstrMailBox
     /**
      * @var string $tableName : table name
      */
-    protected $tableName = 'bfwmailer_sendbox';
+    protected $tableName = 'bfwmailer_sentbox';
     
     
     

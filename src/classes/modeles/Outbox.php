@@ -90,19 +90,19 @@ class Outbox extends AbstrMailBox
      */
     public function get_nextPending($max_sendingAttempts)
     {
-        // Nous construisons nos données pour le test sur l'outbox
-        $outbox_test = array(
+        // creating our database outbox conditions for the fetch
+        $outbox_cond = array(
             ':pending'     => \BfwMailer\SendindStatus::STATE_PENDING, 
             ':failed'      => \BfwMailer\SendindStatus::STATE_FAILED, 
             ':maxAttempts' => $max_sendingAttempts,
             ':actualTime'  => time());
         
-        // Connexion à la bdd pour récupérer l'email actif avec la plus petite priorité (type)
+        // retrieving active email with the lower priority
         $req = $this->select()->from($this->tableName)
                 ->where('('.self::DB_STATE.    '=:pending OR '
                         .self::DB_STATE.       '=:failed) AND '
                         .self::DB_ATTEMPTS.'<:maxAttempts AND '
-                        .self::DB_LAST_ACT.    '<=:actualTime', $outbox_test)
+                        .self::DB_LAST_ACT.    '<=:actualTime', $outbox_cond)
                 ->order(self::DB_PRIORITY.' ASC')
                 ->limit(1);
         $outbox = $this->fetch_sql($req, 'fetchRow');

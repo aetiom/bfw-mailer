@@ -59,11 +59,11 @@ class QueueHandler {
      */
     public function enqueue (\PHPMailer &$email, SendindStatus &$sendingStatus) 
     {   
-        // Nous traitons notre contenu
+        // processing email content and retreiving content database id
         $cont_id = $this->process_content($email);
 
-        // Si nous avons un id, nous construisons le données de l'outbox et nous 
-        // les poussons dans la table prévue à cet effet
+        // if content processing going well, add email metadata into outbox and
+        // update the sending status of the whole email
         if ($cont_id !== false) {
 
             $out_id = $this->db_outbox->add( 
@@ -95,7 +95,7 @@ class QueueHandler {
      */
     public function dequeue (\PHPMailer &$email, SendindStatus &$sendingStatus, $max_sendingAttempts) 
     {
-        // we refresh our scheduled elements before going further
+        // refreshing our scheduled elements before going further
         $this->db_outbox->refresh_scheduled(time());
         
         // get the next email to send from the queue
@@ -103,24 +103,26 @@ class QueueHandler {
         
         if ($out_id !== false) {
             
+            // retrieving outbox and content data
             $outbox = $this->db_outbox->retrieve($out_id);
             $content = $this->db_content->retrieve($outbox[modeles\Outbox::DB_CONT_ID]);
 
-            // Nous construisons notre contenu pour injection dans la base
+            // making email sending status
             $sendingStatus->priority      = $outbox[modeles\Outbox::DB_PRIORITY];
             $sendingStatus->state         = $outbox[modeles\Outbox::DB_STATE];
             $sendingStatus->error         = $outbox[modeles\Outbox::DB_ERROR];
             $sendingStatus->attempts      = $outbox[modeles\Outbox::DB_ATTEMPTS];
             $sendingStatus->lastAction_ts = $outbox[modeles\Outbox::DB_LAST_ACT];
 
+            // making email metadata
             $this->add_emailAttr($email, $outbox[modeles\Outbox::DB_FROM], 'From');
             $this->add_emailAttr($email, $outbox[modeles\Outbox::DB_REPLY], 'ReplyTo');
             $this->add_emailAttr($email, $outbox[modeles\Outbox::DB_TO], 'Address');
             $this->add_emailAttr($email, $outbox[modeles\Outbox::DB_CC], 'CC');
             $this->add_emailAttr($email, $outbox[modeles\Outbox::DB_BCC], 'BCC');
 
+            // constructing email content
             if ($content !== false) {
-
                 $email->Subject = $content[modeles\Content::DB_SUBJECT];
                 $email->Body    = $content[modeles\Content::DB_BODY];
                 $email->AltBody = $content[modeles\Content::DB_ALT_BODY];
@@ -145,7 +147,6 @@ class QueueHandler {
         
         // flushing old sent emails and old failed emails
         $this->clean_db(time() - $this->sent_ttl);
-
         return false;
     }
     
@@ -161,11 +162,12 @@ class QueueHandler {
      */
     public function archive (\PHPMailer &$email, $outbox_id = null) 
     {   
-        // Nous traitons notre contenu
+        // processing email content and retreiving content database id
         $cont_id = $this->process_content($email);
 
-        // Si nous avons un id, nous construisons le données de l'outbox et nous 
-        // les poussons dans la table prévue à cet effet
+        // if content processing going well, add email metadata into sentbox,
+        // update the last action timestamp of the whole email 
+        // and remove the email metadata from the outbox
         if ($cont_id !== false) {
 
             $send_id = $this->db_sentbox->add( 

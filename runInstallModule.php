@@ -11,8 +11,6 @@ $modulePath = realpath(__DIR__).'/';
 $db_initscript = 'bfwmailer_init_db.php';
 $process_q_script = 'bfwmailer_process_q.php';
 
-
-//$result .= "\033[0m\n";
 echo "\n".'     > Copy script '."\033[0;36m".$process_q_script."\033[0m into /src/cli/";
 
 // We check that our destination file does not exist
