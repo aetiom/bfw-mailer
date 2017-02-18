@@ -56,7 +56,7 @@ class Sentbox extends AbstrMailBox
                 ->where(self::DB_LAST_ACT.'<=:limit', array(':limit' => $timestamp))
                 ->execute();
         
-        if ($req === false) {
+        if (empty($req)) {
             throw new \Exception('flush failed in table '.$this->tableName.' for timestamp '.$timestamp);
         }
         

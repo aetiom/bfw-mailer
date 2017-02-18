@@ -65,7 +65,7 @@ abstract class AbstrEmailData extends AbstrModeles
                     ->execute();
 
 
-            if ($req === false) {
+            if (empty($req)) {
                 throw new \Exception('last action update failed in table '.$this->tableName.' for id '.$id);
             }
         }
@@ -93,7 +93,7 @@ abstract class AbstrEmailData extends AbstrModeles
                 ->where(self::DB_ID.'=:id', array('id' => $id))
                 ->execute();
 
-        if ($req === false) {
+        if (empty($req)) {
             throw new \Exception('removing failed in table '.$this->tableName.' for id '.$outbox_id);
         }
     }
