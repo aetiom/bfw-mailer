@@ -11,7 +11,7 @@
  * depending on your emailing volume) with command line : php cli.php bfwmailer_process_q
  */
 
-// Retrieve logger module from BFW Application
+// Retrieve mailer module from BFW Application
 $mailer = \BFW\Application::getInstance()->getModule('mailer')->mailer;
 
 // Processing mail queue by dequeuing, sending and archiving ONLY A SINGLE EMAIL from outbox
