@@ -69,10 +69,10 @@ class Outbox extends AbstrMailBox
         if ($email_id !== false) {
             // If email_id is not false, we set priority to the email previously added
             $req = $this->update($this->tableName, array (self::DB_PRIORITY => $prio))
-                ->where(self::DB_ID.'=:id', array(':id' => $email_id));
-            $res = $req->execute();
+                    ->where(self::DB_ID.'=:id', array(':id' => $email_id))
+                    ->execute();
             
-            if ($res !== false) {
+            if (empty($req)) {
                 return $email_id;
             }
         }
@@ -138,7 +138,7 @@ class Outbox extends AbstrMailBox
                 ->where(self::DB_ID.'=:id', array(':id' => $outbox_id))
                 ->execute();
 
-        if ($req === false) {
+        if (empty($req)) {
             throw \Exception('outbox status update failed for email '.$outbox_id);
         }
     }
@@ -168,7 +168,7 @@ class Outbox extends AbstrMailBox
                     ->where(self::DB_ID.'=:id', array(':id' => $email[self::DB_ID]))
                     ->execute();
 
-            if ($req === false) {
+            if (empty($req)) {
                 throw \Exception("scheduled email refresh failed while updating email ".$email[self::DB_ID]);
             }
         }
@@ -201,7 +201,7 @@ class Outbox extends AbstrMailBox
                 ->where(self::DB_STATE.'=:scheduled AND '.self::DB_LAST_ACT.'<=:actualTime', $mailbox_data)
                 ->execute();
         
-        if ($req === false) {
+        if (empty($req)) {
             throw new \Exception('flush failed in table '.$this->tableName.' for timestamp '.$timestamp);
         }
         
