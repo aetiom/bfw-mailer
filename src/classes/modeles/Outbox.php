@@ -92,8 +92,8 @@ class Outbox extends AbstrMailBox
     {
         // creating our database outbox conditions for the fetch
         $outbox_cond = array(
-            ':pending'     => \BfwMailer\SendindStatus::STATE_PENDING, 
-            ':failed'      => \BfwMailer\SendindStatus::STATE_FAILED, 
+            ':pending'     => \BfwMailer\SendingStatus::STATE_PENDING, 
+            ':failed'      => \BfwMailer\SendingStatus::STATE_FAILED, 
             ':maxAttempts' => $max_sendingAttempts,
             ':actualTime'  => time());
         
@@ -159,11 +159,11 @@ class Outbox extends AbstrMailBox
         
         // construct data to push
         $mailbox_push = array (
-            self::DB_STATE    => \BfwMailer\SendindStatus::STATE_PENDING,
+            self::DB_STATE    => \BfwMailer\SendingStatus::STATE_PENDING,
             self::DB_LAST_ACT => time()
         );
 
-        foreach ($mailbox as $email) {
+        foreach ($mailbox_push as $email) {
             $req = $this->update($this->tableName, $mailbox_push)
                     ->where(self::DB_ID.'=:id', array(':id' => $email[self::DB_ID]))
                     ->execute();
@@ -192,7 +192,7 @@ class Outbox extends AbstrMailBox
         
         // construct data
         $mailbox_data = array(
-            ':scheduled'  => \BfwMailer\SendindStatus::STATE_FAILED,
+            ':scheduled'  => \BfwMailer\SendingStatus::STATE_FAILED,
             ':actualTime' => $timestamp
         );
         
@@ -219,7 +219,7 @@ class Outbox extends AbstrMailBox
     protected function is_flush_needed($timestamp) {
         // construct data for test purposes
         $mailbox_data = array(
-            ':scheduled'  => \BfwMailer\SendindStatus::STATE_FAILED,
+            ':scheduled'  => \BfwMailer\SendingStatus::STATE_FAILED,
             ':actualTime' => $timestamp
         );
         
@@ -245,7 +245,7 @@ class Outbox extends AbstrMailBox
     private function is_refresh_needed($timestamp) {
         // construct data for test purposes
         $mailbox_data = array(
-            ':scheduled'  => \BfwMailer\SendindStatus::STATE_SCHEDULED,
+            ':scheduled'  => \BfwMailer\SendingStatus::STATE_SCHEDULED,
             ':actualTime' => $timestamp
         );
         

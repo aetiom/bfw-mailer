@@ -16,7 +16,7 @@ class Mailer {
     protected $email = null;
     
     /**
-     * @var SendindStatus|null $sendingStatus Sending status of the current email being processed
+     * @var SendingStatus|null $sendingStatus Sending status of the current email being processed
      */
     protected $sendingStatus = null;
     
@@ -71,7 +71,7 @@ class Mailer {
      * @throws \Exception
      * @return boolean false on error - See the ErrorInfo property for details of the error.
      */
-    public function queue_email(\PHPMailer &$email, $priority = SendindStatus::PRIO_DEFAULT, $scheduledTime = 0)
+    public function queue_email(\PHPMailer &$email, $priority = \BfwMailer\SendingStatus::PRIO_DEFAULT, $scheduledTime = 0)
     {
         $this->initialize($email);
         
@@ -80,7 +80,7 @@ class Mailer {
         }
 
         if (is_numeric($scheduledTime) && $scheduledTime !== 0) {
-            $this->sendingStatus->state = SendindStatus::STATE_SCHEDULED;
+            $this->sendingStatus->state = SendingStatus::STATE_SCHEDULED;
             $this->sendingStatus->lastAction_ts = $scheduledTime;
         }
 
@@ -95,7 +95,7 @@ class Mailer {
         } catch (\Exception $e) {
             $this->email = null;
             $this->sendingStatus = null;
-
+            
             throw $e;
         }
 
@@ -117,13 +117,13 @@ class Mailer {
     {
         $this->initialize($email);
 
-        $this->sendingStatus->priority = SendindStatus::PRIO_SYSTEM;
-        $this->sendingStatus->state = SendindStatus::STATE_PENDING;
+        $this->sendingStatus->priority = SendingStatus::PRIO_SYSTEM;
+        $this->sendingStatus->state = SendingStatus::STATE_PENDING;
 
         $isSent = $this->send();
         
         if ($isSent) {
-            $this->sendingStatus->state = SendindStatus::STATE_SUCCEEDED;
+            $this->sendingStatus->state = SendingStatus::STATE_SUCCEEDED;
             
             if ($archive === true) {
                 $this->sendingStatus->queue_id = $this->queueHandler->archive($this->email);
@@ -210,8 +210,8 @@ class Mailer {
             $this->email =  new \PHPMailer();
         }
         
-        $this->sendingStatus = new SendindStatus();
-        $this->sendingStatus->state = SendindStatus::STATE_PENDING;
+        $this->sendingStatus = new SendingStatus();
+        $this->sendingStatus->state = SendingStatus::STATE_PENDING;
     }
     
     
@@ -228,12 +228,12 @@ class Mailer {
         $isSent = $this->email->send();
                 
         if ($isSent === true) {
-            $this->sendingStatus->state = SendindStatus::STATE_SUCCEEDED;
+            $this->sendingStatus->state = SendingStatus::STATE_SUCCEEDED;
             $this->sendingStatus->lastAction_ts = time();
             
         // if we are not in send then archive behavior, update the sending status
         } elseif ($outbox_id !== null) {
-            $this->sendingStatus->state = SendindStatus::STATE_FAILED;
+            $this->sendingStatus->state = SendingStatus::STATE_FAILED;
             $this->sendingStatus->attempts += 1;
             
             if ($this->sendingStatus->attempts < $this->options->max_sendingAttempts) {
