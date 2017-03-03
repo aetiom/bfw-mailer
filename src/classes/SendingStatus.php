@@ -8,7 +8,7 @@ namespace BfwMailer;
  * @package bfw-mailer
  * @version 1.0
  */
-class SendindStatus {
+class SendingStatus {
 
     // STATE constants
     const STATE_SCHEDULED = 3;

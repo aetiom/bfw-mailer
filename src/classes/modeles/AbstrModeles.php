@@ -73,10 +73,8 @@ abstract class AbstrModeles extends \BfwSql\Modeles
 
         if ($res) {
             return $res;
-        } elseif (!$res && $req->nb_result() === 0) {
-            return array();
         } else {
-            throw new \Exception('Error while retrieving data.');
+            return array();
         }
     }
 }

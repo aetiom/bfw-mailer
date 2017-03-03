@@ -54,10 +54,10 @@ class QueueHandler {
      * Enqueue email
      * 
      * @param \PHPMailer                $email         : (as REF) PHPMailer object containing email informations (header, content, etc.)
-     * @param \BfwMailer\SendindStatus  $sendingStatus : (as REF) Sending status
+     * @param \BfwMailer\SendingStatus  $sendingStatus : (as REF) Sending status
      * @return mixed : outbox id in case of success, false otherwise
      */
-    public function enqueue (\PHPMailer &$email, SendindStatus &$sendingStatus) 
+    public function enqueue (\PHPMailer &$email, SendingStatus &$sendingStatus) 
     {   
         // processing email content and retreiving content database id
         $cont_id = $this->process_content($email);
@@ -89,11 +89,11 @@ class QueueHandler {
      * with next pending email information (header, content, etc.)
      * 
      * @param \PHPMailer                $email               : (as REF) PHPMailer object containing email informations (header, content, etc.)
-     * @param \BfwMailer\SendindStatus  $sendingStatus       : (as REF) Sending status
+     * @param \BfwMailer\SendingStatus  $sendingStatus       : (as REF) Sending status
      * @param integer                   $max_sendingAttempts : max sending attemps tolerated
      * @return boolean : true in case of success, false otherwise
      */
-    public function dequeue (\PHPMailer &$email, SendindStatus &$sendingStatus, $max_sendingAttempts) 
+    public function dequeue (\PHPMailer &$email, SendingStatus &$sendingStatus, $max_sendingAttempts) 
     {
         // refreshing our scheduled elements before going further
         $this->db_outbox->refresh_scheduled(time());
@@ -138,7 +138,7 @@ class QueueHandler {
             } else {
                 $sendingStatus->lastAction_ts = time();
                 $sendingStatus->error = 'Content (id='.$outbox[modeles\Outbox::DB_CONT_ID].') not found';
-                $sendingStatus->state = SendindStatus::STATE_FAILED;
+                $sendingStatus->state = SendingStatus::STATE_FAILED;
 
                 $this->update_sendingStatus($sendingStatus, $out_id, $outbox[modeles\Outbox::DB_CONT_ID]);
             }
@@ -199,11 +199,11 @@ class QueueHandler {
     /**
      * Update the sending status of an email into the database
      * 
-     * @param \BfwMailer\SendindStatus $sendingStatus : sending status to push into the database
+     * @param \BfwMailer\SendingStatus $sendingStatus : sending status to push into the database
      * @param integer                  $outbox_id     : outbox id
      * @param integer                  $content_id    : content id (default : null)
      */
-    public function update_sendingStatus(SendindStatus $sendingStatus, $outbox_id, $content_id = null)
+    public function update_sendingStatus(SendingStatus $sendingStatus, $outbox_id, $content_id = null)
     {
         if ($content_id === null) {
             $outbox = $this->db_outbox->retrieve($outbox_id);

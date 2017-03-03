@@ -99,7 +99,7 @@ class Content extends AbstrEmailData
         $req = $this->insert($this->tableName, $content)->execute();
         
         if (!empty($req)) {
-            return $this->der_id();
+            return $this->getLastInsertedId();
         }
     }
     

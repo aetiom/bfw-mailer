@@ -12,7 +12,7 @@
  */
 
 // Retrieve mailer module from BFW Application
-$mailer = \BFW\Application::getInstance()->getModule('mailer')->mailer;
+$mailer = \BFW\Application::getInstance()->getModule('bfw-mailer')->mailer;
 
 // Processing mail queue by dequeuing, sending and archiving ONLY A SINGLE EMAIL from outbox
 $mailer->process_queue();

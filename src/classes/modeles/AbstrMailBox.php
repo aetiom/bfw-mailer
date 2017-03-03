@@ -110,7 +110,7 @@ abstract class AbstrMailBox extends AbstrEmailData
         $req = $this->insert($this->tableName, $mailbox)->execute();
         
         if (!empty($req)) {
-            return $this->der_id();
+            return $this->getLastInsertedId();
         }
         
         return false;
