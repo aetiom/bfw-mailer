@@ -271,17 +271,14 @@ class Mailer {
      * @return \PHPMailer : the merged \PHPMailer
      */
     private function merge_conf(\PHPMailer $email_conf, \PHPMailer $global_conf, \PHPMailer $default_conf) 
-    {
-        $email_conf = (array)$email_conf;
-        $global_conf = (array)$global_conf;
-        $default_conf = (array)$default_conf;
-        
-        foreach ($global_conf as $key => $global_val) {
-            if (!isset($email_conf[$key]) || $email_conf[$key] === $default_conf[$key]) {
-                $email_conf[$key] = $global_val;
+    {   
+        foreach ($global_conf as $property => $global_val) {
+            if (!isset($email_conf->$property) 
+                    || $email_conf->$property === $default_conf->$property) {
+                $email_conf->$property = $global_val;
             }
         }
-        return (object)$email_conf;
+        return $email_conf;
     }
     
     
