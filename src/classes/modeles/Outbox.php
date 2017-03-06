@@ -72,7 +72,7 @@ class Outbox extends AbstrMailBox
                     ->where(self::DB_ID.'=:id', array(':id' => $email_id))
                     ->execute();
             
-            if (empty($req)) {
+            if (!empty($req)) {
                 return $email_id;
             }
         }
@@ -130,7 +130,7 @@ class Outbox extends AbstrMailBox
     {
         $mailbox_push = array (
             self::DB_STATE    => $state,
-            self::DB_ERROR    => '"'.$error.'"',
+            self::DB_ERROR    => $error,
             self::DB_ATTEMPTS => $attempts
         );
 

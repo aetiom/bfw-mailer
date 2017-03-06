@@ -55,7 +55,7 @@ class Mailer {
         $this->options = new MailerOptions($email_config);
         $this->queueHandler = new QueueHandler($this->options);
         
-        $this->email = null;
+        $this->email = new \PHPMailer();
         $this->sendingStatus = null;
     }
     
@@ -193,7 +193,7 @@ class Mailer {
      * Initialize email and sending status by merging default config, and user config.
      * This is a requirement before sending or queuing email
      */
-    private function initialize($email_conf = null)
+    private function initialize(\PHPMailer &$email_conf = null)
     {
         
         if ($email_conf !== null) {
