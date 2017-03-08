@@ -55,7 +55,7 @@ class Mailer {
         $this->options = new MailerOptions($email_config);
         $this->queueHandler = new QueueHandler($this->options);
         
-        $this->email = null;
+        $this->email = new \PHPMailer();
         $this->sendingStatus = null;
     }
     
@@ -193,7 +193,7 @@ class Mailer {
      * Initialize email and sending status by merging default config, and user config.
      * This is a requirement before sending or queuing email
      */
-    private function initialize($email_conf = null)
+    private function initialize(\PHPMailer &$email_conf = null)
     {
         
         if ($email_conf !== null) {
@@ -271,17 +271,14 @@ class Mailer {
      * @return \PHPMailer : the merged \PHPMailer
      */
     private function merge_conf(\PHPMailer $email_conf, \PHPMailer $global_conf, \PHPMailer $default_conf) 
-    {
-        $email_conf = (array)$email_conf;
-        $global_conf = (array)$global_conf;
-        $default_conf = (array)$default_conf;
-        
-        foreach ($global_conf as $key => $global_val) {
-            if (!isset($email_conf[$key]) || $email_conf[$key] === $default_conf[$key]) {
-                $email_conf[$key] = $global_val;
+    {   
+        foreach ($global_conf as $property => $global_val) {
+            if (!isset($email_conf->$property) 
+                    || $email_conf->$property === $default_conf->$property) {
+                $email_conf->$property = $global_val;
             }
         }
-        return (object)$email_conf;
+        return $email_conf;
     }
     
     

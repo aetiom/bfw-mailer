@@ -61,7 +61,7 @@ class QueueHandler {
     {   
         // processing email content and retreiving content database id
         $cont_id = $this->process_content($email);
-
+        
         // if content processing going well, add email metadata into outbox and
         // update the sending status of the whole email
         if ($cont_id !== false) {

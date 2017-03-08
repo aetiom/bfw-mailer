@@ -91,7 +91,7 @@ class Content extends AbstrEmailData
     {
         $content = array(
             self::DB_SUBJECT     => $subject,
-            self::DB_BODY        => $body,
+            self::DB_BODY        => \BfwMailer\Helpers\Secure::securise($body, 'string', false),
             self::DB_ALT_BODY    => $alt_body,
             self::DB_ATTACHMENTS => $attachments
         );
