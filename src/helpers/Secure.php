@@ -1,6 +1,6 @@
 <?php
 
-namespace BfwMailer\helpers;
+namespace BfwMailer\Helpers;
 
 /**
  * Helpers to securize data
@@ -20,6 +20,6 @@ class Secure  extends \BFW\Helpers\Secure {
             return $secureMethod;
         }
 
-        return ['\BfwSql\Helpers', 'protectDatas'];
+        return ['\BfwSql\Helpers\Secure', 'protectDatas'];
     }
 }
