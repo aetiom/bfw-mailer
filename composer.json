@@ -32,7 +32,8 @@
 	{
 		"psr-4":
 		{
-			"BfwMailer\\": "src/classes/"
+			"BfwMailer\\": "src/classes/",
+                        "BfwMailer\\helpers\\": "src/helpers/"
 		}
 	}
 }
