@@ -129,6 +129,7 @@ class QueueHandler {
                 
                 // if we got an alternative body or our body and out alt. body aren't the same, we force the use of HTML
                 if ($email->AltBody !== '' || $email->Body !== '' && $email->Body !== $email->AltBody) {
+                    $email->Body = html_entity_decode($email->Body);
                     $email->isHTML();
                 }
 
