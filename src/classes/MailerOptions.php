@@ -39,7 +39,7 @@ class MailerOptions
      */
     public function __construct(\BFW\Config $config) {
 
-        $this->default_phpmailer = $config->getConfig('default_phpmailer');
+        $this->default_phpmailer = $config->getValue('default_phpmailer');
         $default_phpmailer = new \PHPMailer();
         
         // if $this->default_phpmailer has not been really initialised 
@@ -49,9 +49,9 @@ class MailerOptions
         }
 
         // Clamp max sending attempts value between 1 and 20
-        $this->max_sendingAttempts = max(1, min(20, $config->getConfig('max_sendingAttempts')));
+        $this->max_sendingAttempts = max(1, min(20, $config->getValue('max_sendingAttempts')));
         
         // Clamp TTL value between 0 and 730 days and set it in seconds
-        $this->sent_email_ttl = max(0, min(730, $config->getConfig('sent_email_ttl'))) * 86400;
+        $this->sent_email_ttl = max(0, min(730, $config->getValue('sent_email_ttl'))) * 86400;
     }
 }
