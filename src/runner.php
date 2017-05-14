@@ -6,7 +6,7 @@
  * @version 1.0
  */
 
-$config = $module->getConfig();
+$config = $this->getConfig();
 
 // Instanciate our mailer class
-$module->mailer = new \BfwMailer\Mailer($config);
+$this->mailer = new \BfwMailer\Mailer($config);
