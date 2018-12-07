@@ -11,7 +11,7 @@ namespace BfwMailer;
 class MailerOptions 
 {
     /**
-     * @var \PHPMailer $default_phpmailer : Default PHPMailer object 
+     * @var \PHPMailer\PHPMailer\PHPMailer $default_phpmailer : Default PHPMailer object 
      * (for default sending and header options)
      */
     public $default_phpmailer;
@@ -33,7 +33,7 @@ class MailerOptions
     public function __construct(\BFW\Config $config) {
 
         $this->default_phpmailer = $config->getValue('default_phpmailer');
-        $default_phpmailer = new \PHPMailer();
+        $default_phpmailer = new \PHPMailer\PHPMailer\PHPMailer();
         
         // if $this->default_phpmailer has not been really initialised 
         // by the user, then we set it to null.

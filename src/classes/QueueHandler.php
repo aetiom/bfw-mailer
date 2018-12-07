@@ -53,11 +53,13 @@ class QueueHandler {
     /**
      * Enqueue email
      * 
-     * @param \PHPMailer                $email         : (as REF) PHPMailer object containing email informations (header, content, etc.)
-     * @param \BfwMailer\SendingStatus  $sendingStatus : (as REF) Sending status
+     * @param \PHPMailer\PHPMailer\PHPMailer $email         : (as REF) PHPMailer object 
+     *                                                        containing email informations 
+     *                                                        (header, content, etc.)
+     * @param \BfwMailer\SendingStatus       $sendingStatus : (as REF) Sending status
      * @return mixed : outbox id in case of success, false otherwise
      */
-    public function enqueue (\PHPMailer &$email, SendingStatus &$sendingStatus) 
+    public function enqueue (\PHPMailer\PHPMailer\PHPMailer &$email, SendingStatus &$sendingStatus) 
     {   
         // processing email content and retreiving content database id
         $cont_id = $this->process_content($email);
@@ -88,12 +90,12 @@ class QueueHandler {
      * Dequeue next pending email and modify params objects content passed as references 
      * with next pending email information (header, content, etc.)
      * 
-     * @param \PHPMailer                $email               : (as REF) PHPMailer object containing email informations (header, content, etc.)
-     * @param \BfwMailer\SendingStatus  $sendingStatus       : (as REF) Sending status
-     * @param integer                   $max_sendingAttempts : max sending attemps tolerated
+     * @param \PHPMailer\PHPMailer\PHPMailer $email               : (as REF) PHPMailer object containing email informations (header, content, etc.)
+     * @param \BfwMailer\SendingStatus       $sendingStatus       : (as REF) Sending status
+     * @param integer                        $max_sendingAttempts : max sending attemps tolerated
      * @return boolean : true in case of success, false otherwise
      */
-    public function dequeue (\PHPMailer &$email, SendingStatus &$sendingStatus, $max_sendingAttempts) 
+    public function dequeue (\PHPMailer\PHPMailer\PHPMailer &$email, SendingStatus &$sendingStatus, $max_sendingAttempts) 
     {
         // refreshing our scheduled elements before going further
         $this->db_outbox->refresh_scheduled(time());
@@ -157,11 +159,11 @@ class QueueHandler {
     /**
      * Archive an email into sentbox
      * 
-     * @param \PHPMailer $email     : (as REF) PHPMailer object containing email informations (header, content, etc.)
-     * @param integer    $outbox_id : outbox id if the email comes from the outbox (default : null)
+     * @param \PHPMailer\PHPMailer\PHPMailer $email     : (as REF) PHPMailer object containing email informations (header, content, etc.)
+     * @param integer                        $outbox_id : outbox id if the email comes from the outbox (default : null)
      * @return integer|boolean : return sentbox in case of success, false if it fails
      */
-    public function archive (\PHPMailer &$email, $outbox_id = null) 
+    public function archive (\PHPMailer\PHPMailer\PHPMailer &$email, $outbox_id = null) 
     {   
         // processing email content and retreiving content database id
         $cont_id = $this->process_content($email);
@@ -243,10 +245,10 @@ class QueueHandler {
      * Processing content of an email by searching if and returning it's identifier 
      * or by creating it if it doesn't exist, and returning it's identifier
      * 
-     * @param \PHPMailer $email : (as REF) PHPMailer object containing email informations (header, content, etc.)
+     * @param \PHPMailer\PHPMailer\PHPMailer $email : (as REF) PHPMailer object containing email informations (header, content, etc.)
      * @return integer : content id of the processed content
      */
-    private function process_content(\PHPMailer &$email) {
+    private function process_content(\PHPMailer\PHPMailer\PHPMailer &$email) {
         // Convert array attachments into a string
         $attachments = $this->serial_emailAttr($email->getAttachments());
         
@@ -292,12 +294,12 @@ class QueueHandler {
     /**
      * Format and add an attribute that coming from the database to an email
      * 
-     * @param \PHPMailer $email   : (as REF) PHPMailer object containing email informations (header, content, etc.)
-     * @param string     $db_data : line of data coming from the database
-     * @param string     $attr    : attribut to add to the email, can take those values : From, Address, ReplyTo, CC, BCC, Attachment
+     * @param \PHPMailer\PHPMailer\PHPMailer $email   : (as REF) PHPMailer object containing email informations (header, content, etc.)
+     * @param string                         $db_data : line of data coming from the database
+     * @param string                         $attr    : attribut to add to the email, can take those values : From, Address, ReplyTo, CC, BCC, Attachment
      * @return boolean : return true in case of success, false otherwise
      */
-    private function add_emailAttr(\PHPMailer &$email, $db_data, $attr = 'Address')
+    private function add_emailAttr(\PHPMailer\PHPMailer\PHPMailer &$email, $db_data, $attr = 'Address')
     {
         $method = 'add';
         

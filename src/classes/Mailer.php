@@ -55,7 +55,7 @@ class Mailer {
         $this->options = new MailerOptions($email_config);
         $this->queueHandler = new QueueHandler($this->options);
         
-        $this->email = new \PHPMailer();
+        $this->email = new \PHPMailer\PHPMailer\PHPMailer();
         $this->sendingStatus = null;
     }
     
@@ -64,14 +64,14 @@ class Mailer {
     /**
      * Queue email without sending it
      * 
-     * @param \PHPMailer $email         : phpmailer email by reference
+     * @param \PHPMailer\PHPMailer\PHPMailer $email         : phpmailer email by reference
      * @param integer    $priority      : email priority (from SendingStatus)
      * @param integer    $scheduledTime : sending scheduled time 
      * 
      * @throws \Exception
      * @return boolean false on error - See the ErrorInfo property for details of the error.
      */
-    public function queue_email(\PHPMailer &$email, $priority = \BfwMailer\SendingStatus::PRIO_DEFAULT, $scheduledTime = 0)
+    public function queue_email(\PHPMailer\PHPMailer\PHPMailer &$email, $priority = \BfwMailer\SendingStatus::PRIO_DEFAULT, $scheduledTime = 0)
     {
         $this->initialize($email);
         
@@ -108,12 +108,12 @@ class Mailer {
     /**
      * Send email directly, then queue it after (see options for more details)
      * 
-     * @param \PHPMailer $email   : phpmailer email by reference
-     * @param boolean    $archive : if true, queue email after sending it (default = true)
+     * @param \PHPMailer\PHPMailer\PHPMailer $email   : phpmailer email by reference
+     * @param boolean                        $archive : if true, queue email after sending it (default = true)
      * 
      * @return boolean : true when email is sent successfully, false otherwise
      */
-    public function send_email(\PHPMailer &$email, $archive = false) 
+    public function send_email(\PHPMailer\PHPMailer\PHPMailer &$email, $archive = false) 
     {
         $this->initialize($email);
 
@@ -192,22 +192,24 @@ class Mailer {
     /**
      * Initialize email and sending status by merging default config, and user config.
      * This is a requirement before sending or queuing email
+     * 
+     * @param \PHPMailer\PHPMailer\PHPMailer $email_conf : phpmailer email by reference
      */
-    private function initialize(\PHPMailer &$email_conf = null)
+    private function initialize(\PHPMailer\PHPMailer\PHPMailer &$email_conf = null)
     {
         
         if ($email_conf !== null) {
             $this->email =  $email_conf;
             
             if ($this->options->default_phpmailer !== null) {
-                $default = new \PHPMailer();
+                $default = new \PHPMailer\PHPMailer\PHPMailer();
                 $this->email = $this->merge_conf($email_conf, 
                         $this->options->default_phpmailer, $default);
             }
         } elseif ($this->options->default_phpmailer !== null) {
             $this->email = clone $this->options->default_phpmailer;
         } else {
-            $this->email =  new \PHPMailer();
+            $this->email =  new \PHPMailer\PHPMailer\PHPMailer();
         }
         
         $this->sendingStatus = new SendingStatus();
@@ -255,7 +257,7 @@ class Mailer {
     
     
     /**
-     * Merge three differents \PHPMailer objects.
+     * Merge three differents \PHPMailer\PHPMailer\PHPMailer objects.
      * 
      * The email_conf key values has priority over all, except if they're equal 
      * to default_conf. In that case, we set the key values to global_conf key values
@@ -265,12 +267,14 @@ class Mailer {
      * 
      * Keys and values are checked, kept and replaced one by one.
      * 
-     * @param \PHPMailer $email_conf   : current email configuration object
-     * @param \PHPMailer $global_conf  : user global configuration object
-     * @param \PHPMailer $default_conf : default configuration object
-     * @return \PHPMailer : the merged \PHPMailer
+     * @param \PHPMailer\PHPMailer\PHPMailer $email_conf   : current email configuration object
+     * @param \PHPMailer\PHPMailer\PHPMailer $global_conf  : user global configuration object
+     * @param \PHPMailer\PHPMailer\PHPMailer $default_conf : default configuration object
+     * @return \PHPMailer\PHPMailer\PHPMailer : the merged \PHPMailer\PHPMailer\PHPMailer object
      */
-    private function merge_conf(\PHPMailer $email_conf, \PHPMailer $global_conf, \PHPMailer $default_conf) 
+    private function merge_conf(\PHPMailer\PHPMailer\PHPMailer $email_conf, 
+                                \PHPMailer\PHPMailer\PHPMailer $global_conf, 
+                                \PHPMailer\PHPMailer\PHPMailer $default_conf) 
     {   
         foreach ($global_conf as $property => $global_val) {
             if (!isset($email_conf->$property) 

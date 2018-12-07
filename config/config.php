@@ -1,17 +1,17 @@
 <?php
 /**
- * Configuration file for bfw-advanced-log module
+ * Configuration file for bfw-mailer module
  * @author Aetiom <aetiom@protonmail.com>
  * @package bfw-mailer
- * @version 1.0
+ * @version 1.1
  */
 
-// Default PHPMailer for creating/sending emails
-$default_phpmailer = new PHPMailer();
+// Default \PHPMailer\PHPMailer\PHPMailer for creating/sending emails
+$default_phpmailer = new \PHPMailer\PHPMailer\PHPMailer();
 
 return (object)[
     /**
-     * @var PHPMailer default_phpmailer : Default PHPMailer object 
+     * @var \PHPMailer\PHPMailer\PHPMailer default_phpmailer : Default PHPMailer object 
      * (for default sending and header options).
      */
     'default_phpmailer' => $default_phpmailer,
