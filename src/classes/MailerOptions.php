@@ -1,19 +1,12 @@
 <?php
-/**
- * Classes permettant de gérer l'envoi d'email
- * @author Alexandre Moittié <contact@alexandre-moittie.com>
- * @package bfw-mailer
- * @version 1.0
- */
 
 namespace BfwMailer;
 
-
 /**
  * Class that carries the mailer options
- * @author Alexandre Moittié <contact@alexandre-moittie.com>
+ * @author Aetiom <aetiom@protonmail.com>
  * @package bfw-mailer
- * @version 1.0
+ * @version 1.1
  */
 class MailerOptions 
 {

@@ -4,9 +4,9 @@ namespace BfwMailer;
 
 /**
  * Class that manage the mailer and the sending/queueing process
- * @author Alexandre Moittié <contact@alexandre-moittie.com>
+ * @author Aetiom <aetiom@protonmail.com>
  * @package bfw-mailer
- * @version 1.0
+ * @version 1.1
  */
 class Mailer {
     

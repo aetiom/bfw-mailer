@@ -4,6 +4,9 @@ namespace BfwMailer\Helpers;
 
 /**
  * Helpers to securize data
+ * @author Aetiom <aetiom@protonmail.com>
+ * @package bfw-mailer
+ * @version 1.1
  */
 class Secure  extends \BFW\Helpers\Secure {
     

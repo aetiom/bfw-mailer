@@ -1,31 +1,31 @@
 {
-	"name": "dremecker/bfw-mailer",
+	"name": "aetiom/bfw-mailer",
 	"type": "library",
-	"description": "Advanced log module for BFW framework",
+	"description": "Advanced mailer module for BFW framework",
 	"keywords": ["mailer", "email", "module", "bfw"],
-	"homepage": "https://github.com/dremecker/bfw-mailer",
-	"time": "2017-02-10",
+	"homepage": "https://github.com/aetiom/bfw-mailer",
+	"time": "2018-12-07",
 	"license": "LGPL-3.0",
 	"authors":
 	[
 		{
-			"name": "Alexandre Moittié / Dremecker",
-			"homepage": "http://www.alexandre-moittie.com",
-			"email": "contact@alexandre-moittie.com"
+			"name": "Aetiom",
+			"homepage": "https://github.com/aetiom/",
+			"email": "aetiom@protonmail.com"
 		}
 	],
 	"support":
 	{
-		"email": "contact@alexandre-moittie.com",
-		"issues": "https://github.com/dremecker/bfw-mailer/issues",
-		"source": "https://github.com/dremecker/bfw-mailer"
+		"email": "aetiom@protonmail.com",
+		"issues": "https://github.com/aetiom/bfw-mailer/issues",
+		"source": "https://github.com/aetiom/bfw-mailer"
 	},
 	"require":
 	{
-		"php": ">=5.6.0",
-                "bulton-fr/bfw": "3.0.0-rc.2",
-                "bulton-fr/bfw-sql": "2.0.0-rc.2",
-                "phpmailer/phpmailer": "~5.2"
+		"php": "^7.0.0",
+                "bulton-fr/bfw": "3.0.0-rc.10",
+                "bulton-fr/bfw-sql": "2.0.0-rc.10",
+                "phpmailer/phpmailer": "~6.0"
 	},
 	"minimum-stability": "stable",
 	"autoload":

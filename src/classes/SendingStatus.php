@@ -4,9 +4,9 @@ namespace BfwMailer;
 
 /**
  * Class that carries the sending status
- * @author Alexandre Moittié <contact@alexandre-moittie.com>
+ * @author Aetiom <aetiom@protonmail.com>
  * @package bfw-mailer
- * @version 1.0
+ * @version 1.1
  */
 class SendingStatus {
 
