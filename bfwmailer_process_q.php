@@ -1,9 +1,9 @@
 <?php
 /**
  * Script for sending email from the BFW Mailer queue (outbox)
- * @author Alexandre Moittié <contact@alexandre-moittie.com>
+ * @author Aetiom <aetiom@protonmail.com>
  * @package bfw-mailer
- * @version 1.0
+ * @version 1.1
  */
 
 /*
@@ -12,7 +12,7 @@
  */
 
 // Retrieve mailer module from BFW Application
-$mailer = \BFW\Application::getInstance()->getModule('bfw-mailer')->mailer;
+$mailer = \BFW\Application::getInstance()->getModuleList()->getModuleByName('bfw-mailer')->mailer;
 
 // Processing mail queue by dequeuing, sending and archiving ONLY A SINGLE EMAIL from outbox
 $mailer->process_queue();

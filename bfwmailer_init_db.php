@@ -1,9 +1,9 @@
 <?php
 /**
  * Initialisation script for the module database
- * @author Alexandre Moittié <contact@alexandre-moittie.com>
+ * @author Aetiom <aetiom@protonmail.com>
  * @package bfw-mailer
- * @version 1.0
+ * @version 1.1
  */
 
 //Default: Run by BFW install module script
@@ -36,7 +36,7 @@ $app = \BFW\Application::getInstance();
 echo $shiftingActions.' Verifying bfw-sql configuration... ';
 
 try {
-    $bfwsql = $app->getModule('bfw-sql');
+    $bfwsql = $app->getModuleList()->getModuleByName('bfw-sql');
 } catch (\Exception $e) {
     // Display error and tip message if the bfw-sql module is missing
     echo "\033[1;31m Fail !\n"

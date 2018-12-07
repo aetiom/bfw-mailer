@@ -1,9 +1,9 @@
 <?php
 /**
  * Initialisation script for the module
- * @author Alexandre Moittié <contact@alexandre-moittie.com>
+ * @author Aetiom <aetiom@protonmail.com>
  * @package bfw-mailer
- * @version 1.0
+ * @version 1.1
  */
 
 $config = $this->getConfig();
