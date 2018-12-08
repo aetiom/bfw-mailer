@@ -8,7 +8,7 @@ namespace BfwMailer\modeles;
  * @package bfw-mailer
  * @version 1.1
  */
-abstract class AbstrModeles extends \BfwSql\Modeles
+abstract class AbstrModeles extends \BfwSql\AbstractModeles
 {
     
     /**
