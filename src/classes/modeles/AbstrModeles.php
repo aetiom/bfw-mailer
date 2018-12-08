@@ -65,7 +65,7 @@ abstract class AbstrModeles extends \BfwSql\AbstractModeles
         }
 
         try {
-            $res = $req->{$fetchType}();
+            $res = $req->getExecuter()->{$fetchType}();
         } catch (\Exception $e) {
             trigger_error($e->getMessage(), E_USER_ERROR);
             return false;
