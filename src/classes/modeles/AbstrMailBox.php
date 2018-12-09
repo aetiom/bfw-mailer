@@ -43,7 +43,7 @@ abstract class AbstrMailBox extends AbstrEmailData
             self::DB_CONT_ID => $cont_id
         );
  
-        $req = $this->select()->from($this->tableName)
+        $req = $this->select()->from($this->tableName, '*')
                 ->where(self::DB_FROM.    '=:'.self::DB_FROM.     ' AND '
                         .self::DB_REPLY.  '=:'.self::DB_REPLY.    ' AND '
                         .self::DB_TO.     '=:'.self::DB_TO.       ' AND '
@@ -70,7 +70,7 @@ abstract class AbstrMailBox extends AbstrEmailData
      */   
     public function is_content_used($cont_id) 
     {
-        $req = $this->select()->from($this->tableName)
+        $req = $this->select()->from($this->tableName, '*')
                 ->where(self::DB_CONT_ID.'=:cont_id', array ('cont_id' => $cont_id))
                 ->limit(1);
         $result = $this->fetch_sql($req, 'fetchRow');
@@ -133,7 +133,7 @@ abstract class AbstrMailBox extends AbstrEmailData
             Content::DB_ALT_BODY, Content::DB_ATTACHMENTS);
         
         // Connexion à la bdd pour récupérer l'email actif avec la plus petite priorité (type)
-        $req = $this->select()->from($this->tableName)
+        $req = $this->select()->from($this->tableName, '*')
                 ->join($content_tn, $this->tableName.'.'.self::DB_CONT_ID.'='.
                         $content_tn.'.'.Content::DB_ID, $content_map)
                 ->where(1)->order($this->tableName.'.'.self::DB_LAST_ACT.' ASC');

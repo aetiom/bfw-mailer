@@ -61,7 +61,7 @@ class Content extends AbstrEmailData
             self::DB_ATTACHMENTS => $attachments
         );
         
-        $req = $this->select()->from($this->tableName)
+        $req = $this->select()->from($this->tableName, '*')
                 ->where(self::DB_SUBJECT.     '=:'.self::DB_SUBJECT.    ' AND '
                         .self::DB_BODY.       '=:'.self::DB_BODY.       ' AND '
                         .self::DB_ALT_BODY.   '=:'.self::DB_ALT_BODY.   ' AND '
@@ -120,7 +120,7 @@ class Content extends AbstrEmailData
         
         $outbox = new Outbox();
         
-        $req = $this->select()->from($this->tableName)
+        $req = $this->select()->from($this->tableName, '*')
                 ->where(self::DB_LAST_ACT.'<=:limit', array(':limit' => $timestamp));
         $result = $this->fetch_sql($req);
         

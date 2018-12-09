@@ -98,7 +98,7 @@ class Outbox extends AbstrMailBox
             ':actualTime'  => time());
         
         // retrieving active email with the lower priority
-        $req = $this->select()->from($this->tableName)
+        $req = $this->select()->from($this->tableName, '*')
                 ->where('('.self::DB_STATE.    '=:pending OR '
                         .self::DB_STATE.       '=:failed) AND '
                         .self::DB_ATTEMPTS.'<:maxAttempts AND '
@@ -224,7 +224,7 @@ class Outbox extends AbstrMailBox
         );
         
         // prepare the request
-        $req = $this->select()->from($this->tableName)
+        $req = $this->select()->from($this->tableName, '*')
                 ->where(self::DB_STATE.'=:scheduled AND '.self::DB_LAST_ACT.'<=:actualTime', $mailbox_data);
 
         if(empty($this->fetch_sql($req))) {
@@ -250,7 +250,7 @@ class Outbox extends AbstrMailBox
         );
         
         // prepare the request
-        $req = $this->select()->from($this->tableName)
+        $req = $this->select()->from($this->tableName, '*')
                 ->where(self::DB_STATE.'=:scheduled AND '.self::DB_LAST_ACT.'<=:actualTime', $mailbox_data);
 
         if(empty($this->fetch_sql($req))) {

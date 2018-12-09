@@ -26,10 +26,10 @@ abstract class AbstrEmailData extends AbstrModeles
     public function retrieve($id = null)
     {
         if ($id === null) {
-            $req = $this->select()->from($this->tableName);
+            $req = $this->select()->from($this->tableName, '*');
             $result = $this->fetch_sql($req);
         } else {
-            $req = $this->select()->from($this->tableName)->where(self::DB_ID.'=:id', array('id' => $id));
+            $req = $this->select()->from($this->tableName, '*')->where(self::DB_ID.'=:id', array('id' => $id));
             $result = $this->fetch_sql($req, 'fetchRow');
         }
         
@@ -56,7 +56,7 @@ abstract class AbstrEmailData extends AbstrModeles
             $timestamp = strval($timestamp);
         }
         
-        $req = $this->select()->from($this->tableName)->where(self::DB_ID.'=:id', array('id' => $id));
+        $req = $this->select()->from($this->tableName, '*')->where(self::DB_ID.'=:id', array('id' => $id));
         $result = $this->fetch_sql($req, 'fetchRow');
 
         if (!empty($result) && $result[self::DB_LAST_ACT] !== $timestamp) {
@@ -109,7 +109,7 @@ abstract class AbstrEmailData extends AbstrModeles
     protected function is_flush_needed($timestamp) {
         
         // prepare the request
-        $req = $this->select()->from($this->tableName)
+        $req = $this->select()->from($this->tableName, '*')
                 ->where(self::DB_LAST_ACT.'<=:limit', array(':limit' => $timestamp));
 
         if(empty($this->fetch_sql($req))) {
