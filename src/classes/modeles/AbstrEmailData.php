@@ -60,7 +60,7 @@ abstract class AbstrEmailData extends AbstrModeles
         $result = $this->fetch_sql($req, 'fetchRow');
 
         if (!empty($result) && $result[self::DB_LAST_ACT] !== $timestamp) {
-            $req = $this->update($this->tableName, array(self::DB_LAST_ACT => $timestamp))
+            $req = $this->update()->from($this->tableName, array(self::DB_LAST_ACT => $timestamp))
                     ->where(self::DB_ID.'=:id', array(':id' => $id))
                     ->execute();
 
@@ -89,7 +89,7 @@ abstract class AbstrEmailData extends AbstrModeles
     public function remove($id)
     {
         // Delete data from table if last action was performed before $timestamp limit
-        $req = $this->delete($this->tableName)
+        $req = $this->delete()->from($this->tableName)
                 ->where(self::DB_ID.'=:id', array('id' => $id))
                 ->execute();
 

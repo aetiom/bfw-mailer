@@ -52,7 +52,7 @@ class Sentbox extends AbstrMailBox
         }
         
         // Delete data from table if last action was performed before $timestamp limit
-        $req = $this->delete($this->tableName)
+        $req = $this->delete()->from($this->tableName)
                 ->where(self::DB_LAST_ACT.'<=:limit', array(':limit' => $timestamp))
                 ->execute();
         

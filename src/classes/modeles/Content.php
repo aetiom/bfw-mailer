@@ -96,7 +96,7 @@ class Content extends AbstrEmailData
             self::DB_ATTACHMENTS => $attachments
         );
         
-        $req = $this->insert($this->tableName, $content)->execute();
+        $req = $this->insert()->into($this->tableName, $content)->execute();
         
         if (!empty($req)) {
             return $this->getLastInsertedId();
@@ -108,7 +108,7 @@ class Content extends AbstrEmailData
     /**
      * Flush content regarding its last action timestamp, 
      * do not remove content that is actualy used by any outbox email.
-     * Method will delete all deprecated contents that is older than timestamp.
+     * Method will insert()->into all deprecated contents that is older than timestamp.
      * 
      * @param integer $timestamp : timestamp limit
      */

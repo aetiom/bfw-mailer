@@ -68,7 +68,7 @@ class Outbox extends AbstrMailBox
         
         if ($email_id !== false) {
             // If email_id is not false, we set priority to the email previously added
-            $req = $this->update($this->tableName, array (self::DB_PRIORITY => $prio))
+            $req = $this->update()->from($this->tableName, array (self::DB_PRIORITY => $prio))
                     ->where(self::DB_ID.'=:id', array(':id' => $email_id))
                     ->execute();
             
@@ -134,7 +134,7 @@ class Outbox extends AbstrMailBox
             self::DB_ATTEMPTS => $attempts
         );
 
-        $req = $this->update($this->tableName, $mailbox_push)
+        $req = $this->update()->from($this->tableName, $mailbox_push)
                 ->where(self::DB_ID.'=:id', array(':id' => $outbox_id))
                 ->execute();
 
@@ -164,7 +164,7 @@ class Outbox extends AbstrMailBox
         );
 
         foreach ($mailbox_push as $email) {
-            $req = $this->update($this->tableName, $mailbox_push)
+            $req = $this->update()->from($this->tableName, $mailbox_push)
                     ->where(self::DB_ID.'=:id', array(':id' => $email[self::DB_ID]))
                     ->execute();
 
@@ -197,7 +197,7 @@ class Outbox extends AbstrMailBox
         );
         
         // Delete data from table if last action was performed before $timestamp limit
-        $req = $this->delete($this->tableName)
+        $req = $this->delete()->from($this->tableName)
                 ->where(self::DB_STATE.'=:scheduled AND '.self::DB_LAST_ACT.'<=:actualTime', $mailbox_data)
                 ->execute();
         
