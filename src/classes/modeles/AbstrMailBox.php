@@ -34,22 +34,13 @@ abstract class AbstrMailBox extends AbstrEmailData
      */
     public function search($from, $reply, $to, $cc, $bcc, $cont_id)
     {
-        $mailbox = array (
-            self::DB_FROM    => $from,
-            self::DB_REPLY   => $reply,
-            self::DB_TO      => $to,
-            self::DB_CC      => $cc,
-            self::DB_BCC     => $bcc,
-            self::DB_CONT_ID => $cont_id
-        );
- 
         $req = $this->select()->from($this->tableName, '*')
-                ->where(self::DB_FROM.    '=:'.self::DB_FROM.     ' AND '
-                        .self::DB_REPLY.  '=:'.self::DB_REPLY.    ' AND '
-                        .self::DB_TO.     '=:'.self::DB_TO.       ' AND '
-                        .self::DB_CC.     '=:'.self::DB_CC.       ' AND '
-                        .self::DB_BCC.    '=:'.self::DB_BCC.      ' AND '
-                        .self::DB_CONT_ID.'=:'.self::DB_CONT_ID, $mailbox)
+                ->where(self::DB_FROM.   '=:from',  array('from'  => $from))
+                ->where(self::DB_REPLY.  '=:reply', array('reply' => $reply))
+                ->where(self::DB_TO.     '=:to',    array('to'    => $to))
+                ->where(self::DB_CC.     '=:cc',    array('cc'    => $cc))
+                ->where(self::DB_BCC.    '=:bcc',   array('bcc'   => $bcc))
+                ->where(self::DB_CONT_ID.'=:cont',  array('cont'  => $cont_id))
                 ->limit(1);
         $result = $this->fetch_sql($req, 'fetchRow');
 

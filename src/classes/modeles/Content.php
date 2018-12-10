@@ -54,18 +54,11 @@ class Content extends AbstrEmailData
      */
     public function search($subject, $body, $alt_body, $attachments)
     {
-        $content = array(
-            self::DB_SUBJECT     => $subject,
-            self::DB_BODY        => $body,
-            self::DB_ALT_BODY    => $alt_body,
-            self::DB_ATTACHMENTS => $attachments
-        );
-        
         $req = $this->select()->from($this->tableName, '*')
-                ->where(self::DB_SUBJECT.     '=:'.self::DB_SUBJECT.    ' AND '
-                        .self::DB_BODY.       '=:'.self::DB_BODY.       ' AND '
-                        .self::DB_ALT_BODY.   '=:'.self::DB_ALT_BODY.   ' AND '
-                        .self::DB_ATTACHMENTS.'=:'.self::DB_ATTACHMENTS, $content)
+                ->where(self::DB_SUBJECT.    '=:sub',  array(':sub'  => $subject))
+                ->where(self::DB_BODY.       '=:body', array(':body' => $body))
+                ->where(self::DB_ALT_BODY.   '=:altb', array(':altb' => $alt_body))
+                ->where(self::DB_ATTACHMENTS.'=:att',  array(':att'  => $attachments))
                 ->limit(1);
         $result = $this->fetch_sql($req, 'fetchRow');
         

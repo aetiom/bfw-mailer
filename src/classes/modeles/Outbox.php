@@ -190,15 +190,11 @@ class Outbox extends AbstrMailBox
             return false;
         }
         
-        // construct data
-        $mailbox_data = array(
-            ':scheduled'  => \BfwMailer\SendingStatus::STATE_FAILED,
-            ':actualTime' => $timestamp
-        );
-        
         // Delete data from table if last action was performed before $timestamp limit
         $req = $this->delete()->from($this->tableName)
-                ->where(self::DB_STATE.'=:scheduled AND '.self::DB_LAST_ACT.'<=:actualTime', $mailbox_data)
+                ->where(self::DB_STATE.'=:scheduled', 
+                        array(':scheduled' => \BfwMailer\SendingStatus::STATE_FAILED))
+                ->where(self::DB_LAST_ACT.'<=:actualTime', array(':actualTime' => $timestamp))
                 ->execute();
         
         if (empty($req)) {
@@ -217,15 +213,11 @@ class Outbox extends AbstrMailBox
      * @return boolean : true in case of flush is needed, false otherwise
      */
     protected function is_flush_needed($timestamp) {
-        // construct data for test purposes
-        $mailbox_data = array(
-            ':scheduled'  => \BfwMailer\SendingStatus::STATE_FAILED,
-            ':actualTime' => $timestamp
-        );
         
-        // prepare the request
         $req = $this->select()->from($this->tableName, '*')
-                ->where(self::DB_STATE.'=:scheduled AND '.self::DB_LAST_ACT.'<=:actualTime', $mailbox_data);
+                ->where(self::DB_STATE.'=:scheduled', 
+                        array(':scheduled' => \BfwMailer\SendingStatus::STATE_FAILED))
+                ->where(self::DB_LAST_ACT.'<=:actualTime', array(':actualTime' => $timestamp));
 
         if(empty($this->fetch_sql($req))) {
             return false;
@@ -243,15 +235,11 @@ class Outbox extends AbstrMailBox
      * @return boolean : true in case of flush is needed, false otherwise
      */
     private function is_refresh_needed($timestamp) {
-        // construct data for test purposes
-        $mailbox_data = array(
-            ':scheduled'  => \BfwMailer\SendingStatus::STATE_SCHEDULED,
-            ':actualTime' => $timestamp
-        );
         
-        // prepare the request
         $req = $this->select()->from($this->tableName, '*')
-                ->where(self::DB_STATE.'=:scheduled AND '.self::DB_LAST_ACT.'<=:actualTime', $mailbox_data);
+                ->where(self::DB_STATE.'=:scheduled', 
+                        array(':scheduled' => \BfwMailer\SendingStatus::STATE_SCHEDULED))
+                ->where(self::DB_LAST_ACT.'<=:actualTime', array(':actualTime' => $timestamp));
 
         if(empty($this->fetch_sql($req))) {
             return false;
