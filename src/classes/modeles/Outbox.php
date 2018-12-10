@@ -103,7 +103,7 @@ class Outbox extends AbstrMailBox
                         .self::DB_STATE.       '=:failed) AND '
                         .self::DB_ATTEMPTS.'<:maxAttempts AND '
                         .self::DB_LAST_ACT.    '<=:actualTime', $outbox_cond)
-                ->order(self::DB_PRIORITY.' ASC')
+                ->order(self::DB_PRIORITY, 'ASC')
                 ->limit(1);
         $outbox = $this->fetch_sql($req, 'fetchRow');
         

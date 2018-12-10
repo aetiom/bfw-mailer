@@ -136,7 +136,7 @@ abstract class AbstrMailBox extends AbstrEmailData
         $req = $this->select()->from($this->tableName, '*')
                 ->join($content_tn, $this->tableName.'.'.self::DB_CONT_ID.'='.
                         $content_tn.'.'.Content::DB_ID, $content_map)
-                ->where(1)->order($this->tableName.'.'.self::DB_LAST_ACT.' ASC');
+                ->where(1)->order($this->tableName.'.'.self::DB_LAST_ACT, 'ASC');
 
         return $this->fetch_sql($req);
     }
