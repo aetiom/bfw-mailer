@@ -12,17 +12,17 @@ class Secure  extends \BFW\Helpers\Secure {
     
     /**
      * Get the sqlSecure function declared in bfw config file if existing, 
-     * else return the default one : ['\BfwSql\Helpers', 'secureData'].
+     * else return the default one : ['\BfwSql\Helpers\Secure', 'protectDatas'].
      * 
      * @return boolean|string
      */
     public static function getSqlSecureMethod()
     {
         $secureMethod = parent::getSqlSecureMethod();
-        if ($secureMethod !== false) {
+        if ($secureMethod !== null) {
             return $secureMethod;
         }
 
-        return ['\BfwSql\Helpers\Secure', 'secureData'];
+        return ['\BfwSql\Helpers\Secure', 'protectDatas'];
     }
 }
