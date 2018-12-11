@@ -12,12 +12,32 @@ abstract class AbstrModeles extends \BfwSql\AbstractModeles
 {
     
     /**
+     * @var boolean $secure_data : Secure raw data before inserting it into database
+     * (doing a pdo quote on all external stored datas)
+     */
+    protected $secure_data = true;
+    
+    
+    
+    /**
      * Get table name
      * @return string : table name
      */
     public function get_tableName() 
     {
         return $this->tableName;
+    }
+        
+    
+    
+    /**
+     * Constructor
+     */
+    public function __construct() {
+        parent::__construct();
+        
+        $config = \BFW\Application::getInstance()->getModuleList()->getModuleByName('bfw-mailer')->getConfig();
+        $this->secure_data = $config->getValue('secure_data');
     }
     
     
