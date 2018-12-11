@@ -50,6 +50,26 @@ abstract class AbstrModeles extends \BfwSql\AbstractModeles
     
     
     /**
+     * Secure Data before inserting it into database
+     * 
+     * @param string  $data : data value
+     * @param string  $type : data type (integer, boolean, email)
+     * @param boolean $html : use htmlentities
+     * 
+     * @return mixed data value formated and secured
+     */
+    protected function secureData($data, $type='', $html=false)
+    {
+        if ($this->secure_data) {
+            return \BfwMailer\Helpers\Secure::secureData($data, $type, $html);
+        }
+        
+        return $data;
+    }
+    
+    
+    
+    /**
      * Fetching, verifying and returning data on a Sql Fetch
      * 
      * @param SqlSelect $req       : query instance

@@ -55,10 +55,10 @@ class Content extends AbstrEmailData
     public function search($subject, $body, $alt_body, $attachments)
     {
         $req = $this->select()->from($this->tableName, '*')
-                ->where(self::DB_SUBJECT.    '=:sub',  array(':sub'  => $subject))
-                ->where(self::DB_BODY.       '=:body', array(':body' => $body))
-                ->where(self::DB_ALT_BODY.   '=:altb', array(':altb' => $alt_body))
-                ->where(self::DB_ATTACHMENTS.'=:att',  array(':att'  => $attachments))
+                ->where(self::DB_SUBJECT.    '=:sub',  array(':sub'  => $this->secureData($subject)))
+                ->where(self::DB_BODY.       '=:body', array(':body' => $this->secureData($body, '', true)))
+                ->where(self::DB_ALT_BODY.   '=:altb', array(':altb' => $this->secureData($alt_body)))
+                ->where(self::DB_ATTACHMENTS.'=:att',  array(':att'  => $this->secureData($attachments)))
                 ->limit(1);
         $result = $this->fetch_sql($req, 'fetchRow');
         
@@ -83,10 +83,10 @@ class Content extends AbstrEmailData
     public function add($subject, $body, $alt_body, $attachments)
     {
         $content = array(
-            self::DB_SUBJECT     => $subject,
-            self::DB_BODY        => \BfwMailer\Helpers\Secure::secureData($body, 'string', true),
-            self::DB_ALT_BODY    => $alt_body,
-            self::DB_ATTACHMENTS => $attachments
+            self::DB_SUBJECT     => $this->secureData($subject),
+            self::DB_BODY        => $this->secureData($body, '', true),
+            self::DB_ALT_BODY    => $this->secureData($alt_body),
+            self::DB_ATTACHMENTS => $this->secureData($attachments)
         );
         
         $req = $this->insert()->into($this->tableName, $content)->execute();

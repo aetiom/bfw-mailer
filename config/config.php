@@ -25,5 +25,11 @@ return (object)[
      * @var integer sent_email_ttl : Sent email time to live in days. 
      * After that TTL, a sent email can be trashed/flushed.
      */
-    'sent_email_ttl' => 390
+    'sent_email_ttl' => 390,
+    
+    /**
+     * @var boolean secure_data : Secure raw data before inserting it into database
+     * (doing a pdo quote on all external stored datas)
+     */
+    'secure_data' => true
 ];
