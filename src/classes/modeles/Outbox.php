@@ -157,14 +157,22 @@ class Outbox extends AbstrMailBox
             return false;
         }
         
-        // construct data to push
-        $mailbox_push = array (
-            self::DB_STATE    => \BfwMailer\SendingStatus::STATE_PENDING,
-            self::DB_LAST_ACT => time()
-        );
+        // get mailbox data for scheduled items
+        $req = $this->select()->from($this->tableName)
+                ->where(self::DB_STATE.   '=:sched', 
+                        array(':sched' => \BfwMailer\SendindStatus::STATE_SCHEDULED))
+                ->where(self::DB_LAST_ACT.'<=:time', 
+                        array(':time'  => $timestamp));
+        $mailbox = $this->fetchSql($req);
+        
+        if (empty($mailbox)) {
+            return false;
+        }
 
-        foreach ($mailbox_push as $email) {
-            $req = $this->update()->from($this->tableName, $mailbox_push)
+        foreach ($mailbox as $email) {
+            $req = $this->update()->from($this->tableName, array(
+                self::DB_STATE    => \BfwMailer\SendingStatus::STATE_PENDING,
+                self::DB_LAST_ACT => time()))
                     ->where(self::DB_ID.'=:id', array(':id' => $email[self::DB_ID]))
                     ->execute();
 
