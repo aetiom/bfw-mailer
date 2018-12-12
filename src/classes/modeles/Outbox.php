@@ -160,10 +160,10 @@ class Outbox extends AbstrMailBox
         // get mailbox data for scheduled items
         $req = $this->select()->from($this->tableName)
                 ->where(self::DB_STATE.   '=:sched', 
-                        array(':sched' => \BfwMailer\SendindStatus::STATE_SCHEDULED))
+                        array(':sched' => \BfwMailer\SendingStatus::STATE_SCHEDULED))
                 ->where(self::DB_LAST_ACT.'<=:time', 
                         array(':time'  => $timestamp));
-        $mailbox = $this->fetchSql($req);
+        $mailbox = $this->fetch_sql($req);
         
         if (empty($mailbox)) {
             return false;
